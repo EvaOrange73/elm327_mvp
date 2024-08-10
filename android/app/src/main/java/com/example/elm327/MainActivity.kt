@@ -29,8 +29,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private var bluetoothAdapter: BluetoothAdapter? = null
     private val REQUEST_PERMISSION_BLE = 1
+    private var cur_permission: String? = null
 
     @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("ShowToast")
@@ -60,14 +60,13 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        this.showPermissionState(arrayOf(
-            Manifest.permission.POST_NOTIFICATIONS,
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        ))
+        this.showPermissionState(arrayOf(Manifest.permission.POST_NOTIFICATIONS,
+                                         Manifest.permission.BLUETOOTH,
+                                         Manifest.permission.BLUETOOTH_ADMIN,
+                                         Manifest.permission.ACCESS_FINE_LOCATION,
+                                         Manifest.permission.ACCESS_COARSE_LOCATION,
+                                         Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                                         ))
 
     }
 
@@ -77,21 +76,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun showPermissionState(permissions: Array<String>) {
         for (permission in permissions) {
-            showPermissionState(permission)
+            cur_permission = permission
+            showPermissionState()
         }
     }
 
-    private fun showPermissionState(permission: String) {
-        val permissionCheck = ContextCompat.checkSelfPermission(this, permission)
+    private fun showPermissionState() {
+        if (cur_permission == null) return
+        val permissionCheck = ContextCompat.checkSelfPermission(this, cur_permission!!)
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                showExplanation("Permission Needed", "Rationale", permission, REQUEST_PERMISSION_BLE)
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, cur_permission!!)) {
+                showExplanation("Permission Needed", "Rationale", cur_permission!!, REQUEST_PERMISSION_BLE)
             }
             else {
-                requestPermission(permission, REQUEST_PERMISSION_BLE)
+                requestPermission(cur_permission!!, REQUEST_PERMISSION_BLE)
             }
         } else {
-            Toast.makeText(this@MainActivity, "Permission ${permission.split(".").last()} (already) Granted!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MainActivity, "Permission ${cur_permission!!.split('.').last()} already Granted!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -99,10 +100,20 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             REQUEST_PERMISSION_BLE -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this@MainActivity, "Permission Granted!", Toast.LENGTH_SHORT).show()
+                if (cur_permission == null) {
+                    Toast.makeText(this@MainActivity, "Permission ??? Granted!", Toast.LENGTH_SHORT).show()
+                }
+                else {
+                    Toast.makeText(this@MainActivity, "Permission ${cur_permission!!.split('.').last()} Granted!", Toast.LENGTH_SHORT).show()
+                }
             }
             else {
-                Toast.makeText(this@MainActivity, "Permission Denied!", Toast.LENGTH_SHORT).show()
+                if (cur_permission == null) {
+                    Toast.makeText(this@MainActivity, "Permission ??? Denied!", Toast.LENGTH_SHORT).show()
+                }
+                else {
+                    Toast.makeText(this@MainActivity, "Permission ${cur_permission!!.split('.').last()} Denied!", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -111,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(title)
             .setMessage(message)
-            .setPositiveButton(android.R.string.ok,DialogInterface.OnClickListener { dialog, id -> requestPermission(permission, permissionRequestCode) })
+            .setPositiveButton(android.R.string.ok, DialogInterface.OnClickListener { dialog, id -> requestPermission(permission, permissionRequestCode) })
         builder.create().show()
     }
 
