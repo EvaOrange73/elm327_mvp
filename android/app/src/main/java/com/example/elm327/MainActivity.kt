@@ -4,36 +4,33 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanResult
-import android.content.Intent
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.util.Log
-import android.view.Menu
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.elm327.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private var bluetoothAdapter: BluetoothAdapter? = null
+    private val REQUEST_PERMISSION_BLE = 1
 
     @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("ShowToast")
@@ -63,98 +60,63 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
-        bluetoothAdapter = bluetoothManager.adapter
+        this.showPermissionState(arrayOf(
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ))
 
-
-        if (bluetoothAdapter == null) {
-            Toast.makeText(
-                applicationContext,
-                "Device doesn't support Bluetooth",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else if (!bluetoothAdapter!!.isEnabled) {
-            Toast.makeText(applicationContext, "Bluetooth is disabled", Toast.LENGTH_SHORT).show()
-
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-
-            registerForActivityResult(
-                ActivityResultContracts.StartActivityForResult()
-            ) { }.launch(enableBtIntent)
-
-        } else {
-            Toast.makeText(applicationContext, "Bluetooth is enabled", Toast.LENGTH_SHORT).show()
-        }
-        scanLeDevice()
     }
 
-    private val bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
-    private var scanning = false
-    private val handler = Handler()
+    fun onClick(view: View) {
+        Toast.makeText(this@MainActivity, "Button clicked!", Toast.LENGTH_SHORT).show()
+    }
 
-    // Stops scanning after 10 seconds.
-    private val SCAN_PERIOD: Long = 10000
+    private fun showPermissionState(permissions: Array<String>) {
+        for (permission in permissions) {
+            showPermissionState(permission)
+        }
+    }
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun scanLeDevice() {
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Toast.makeText(applicationContext, "needs permission", Toast.LENGTH_SHORT).show()
-
-            val launcher = registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted : Boolean ->
-                Toast.makeText(
-                    applicationContext,
-                    isGranted.toString(),
-                    Toast.LENGTH_SHORT
-                ).show()
+    private fun showPermissionState(permission: String) {
+        val permissionCheck = ContextCompat.checkSelfPermission(this, permission)
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                showExplanation("Permission Needed", "Rationale", permission, REQUEST_PERMISSION_BLE)
             }
-            launcher.launch(Manifest.permission.BLUETOOTH_SCAN)
-        }
-        if (!scanning) { // Stops scanning after a pre-defined scan period.
-            handler.postDelayed({
-                scanning = false
-                bluetoothLeScanner?.stopScan(leScanCallback)
-            }, SCAN_PERIOD)
-            scanning = true
-            bluetoothLeScanner?.startScan(leScanCallback)
+            else {
+                requestPermission(permission, REQUEST_PERMISSION_BLE)
+            }
         } else {
-            scanning = false
-            bluetoothLeScanner?.stopScan(leScanCallback)
+            Toast.makeText(this@MainActivity, "Permission ${permission.split(".").last()} (already) Granted!", Toast.LENGTH_SHORT).show()
         }
     }
 
-    //    private val leDeviceListAdapter = LeDeviceListAdapter()
-    // Device scan callback.
-    private val leScanCallback: ScanCallback = object : ScanCallback() {
-        override fun onScanResult(callbackType: Int, result: ScanResult) {
-            super.onScanResult(callbackType, result)
-            Toast.makeText(applicationContext, "button 3 clicked", Toast.LENGTH_SHORT).show()
-//            leDeviceListAdapter.addDevice(result.device)
-//            leDeviceListAdapter.notifyDataSetChanged()
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_PERMISSION_BLE -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this@MainActivity, "Permission Granted!", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                Toast.makeText(this@MainActivity, "Permission Denied!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-
-    fun clickButton(v: View) {
-        val mToast = Toast.makeText(applicationContext, "button 3 clicked", Toast.LENGTH_SHORT)
-        mToast.show()
+    private fun showExplanation(title: String, message: String, permission: String, permissionRequestCode: Int) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok,DialogInterface.OnClickListener { dialog, id -> requestPermission(permission, permissionRequestCode) })
+        builder.create().show()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
-        return true
-    }
-
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    private fun requestPermission(permissionName: String, permissionRequestCode: Int) {
+        ActivityCompat.requestPermissions(this, arrayOf(permissionName), permissionRequestCode)
     }
 }
+
