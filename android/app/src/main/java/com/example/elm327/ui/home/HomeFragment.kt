@@ -1,19 +1,24 @@
 package com.example.elm327.ui.home
 
 import android.R
+import android.content.Context
 import android.os.Bundle
+import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.PackageManagerCompat.LOG_TAG
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.elm327.databinding.FragmentHomeBinding
 
 
-class HomeFragment : Fragment(){
+class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
 
@@ -37,27 +42,17 @@ class HomeFragment : Fragment(){
             textView.text = it
         }
 
-
-
-//        val view: View = inflater.inflate(R.layout.fragment_home, container, false)
-//        val button = view.findViewById<View>(R.id.start_button) as Button
-//        button.setOnClickListener(this)
+        val button = binding.button1
+        button.setOnClickListener {
+            Toast.makeText(activity, "Bluetooth is disabled", Toast.LENGTH_SHORT).show()
+        }
 
         return root
     }
-
 
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
-//    override fun onClick(v: View?) {
-//        when (v!!.id) {
-//            R.id.start_button -> {
-//                Toast.makeText(activity, "button 3 clicked", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//    }
 }

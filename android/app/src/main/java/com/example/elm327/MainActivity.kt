@@ -4,10 +4,13 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
 import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -32,7 +35,8 @@ class MainActivity : AppCompatActivity() {
     private val REQUEST_PERMISSION_BLE = 1
     private var cur_permission: String? = null
 
-    @RequiresApi(Build.VERSION_CODES.S)
+    private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
     @SuppressLint("ShowToast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,13 +64,14 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        this.showPermissionState(arrayOf(Manifest.permission.POST_NOTIFICATIONS,
-                                         Manifest.permission.BLUETOOTH,
+        this.showPermissionState(arrayOf(Manifest.permission.BLUETOOTH,
                                          Manifest.permission.BLUETOOTH_ADMIN,
                                          Manifest.permission.ACCESS_FINE_LOCATION,
                                          Manifest.permission.ACCESS_COARSE_LOCATION,
                                          Manifest.permission.ACCESS_BACKGROUND_LOCATION
                                          ))
+
+        scanLeDevice()
 
     }
 
@@ -129,5 +134,49 @@ class MainActivity : AppCompatActivity() {
     private fun requestPermission(permissionName: String, permissionRequestCode: Int) {
         ActivityCompat.requestPermissions(this, arrayOf(permissionName), permissionRequestCode)
     }
+
+
+    private val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+    private var scanning = false
+    private val handler = Handler()
+
+//    private val leDeviceListAdapter = LeDeviceListAdapter()
+    // Device scan callback.
+    private val leScanCallback: ScanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
+            Toast.makeText(applicationContext, result.device.address, Toast.LENGTH_SHORT).show()
+//            leDeviceListAdapter.addDevice(result.device)
+//            leDeviceListAdapter.notifyDataSetChanged()
+        }
+    }
+
+    // Stops scanning after 10 seconds.
+    private val SCAN_PERIOD: Long = 10000
+
+    private fun scanLeDevice() {
+        if (!scanning) { // Stops scanning after a pre-defined scan period.
+            handler.postDelayed({
+                scanning = false
+                if (Build.VERSION.SDK_INT >= 30 && ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.BLUETOOTH_SCAN
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                }
+                bluetoothLeScanner.stopScan(leScanCallback)
+            }, SCAN_PERIOD)
+            scanning = true
+            bluetoothLeScanner.startScan(leScanCallback)
+        } else {
+            scanning = false
+            bluetoothLeScanner.stopScan(leScanCallback)
+        }
+    }
+
+
+
 }
 
