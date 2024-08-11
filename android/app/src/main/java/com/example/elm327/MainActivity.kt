@@ -3,6 +3,8 @@ package com.example.elm327
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.DialogInterface
@@ -13,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,30 +30,26 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.elm327.databinding.ActivityMainBinding
+import com.example.elm327.elm.MacAddress
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
 
 class MainActivity : AppCompatActivity() {
     private val REQUEST_PERMISSION_BLE = 1
-    private val SCAN_PERIOD: Long = 10000
+    private val SCAN_PERIOD: Long = 3000
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
-    private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-    private val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-    private val handler = Handler()
-
-    private val locationManager by lazy {
-        applicationContext.getSystemService(
-            LOCATION_SERVICE
-        ) as LocationManager
-    }
-
+    private val bluetoothAdapter: BluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
+    private val bluetoothLeScanner: BluetoothLeScanner by lazy{ bluetoothAdapter.bluetoothLeScanner }
+    private val handler: Handler = Handler()
+    private val locationManager by lazy { applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager }
 
     private var cur_permission: String? = null
-    private var scanning = false
+    private var scanning: Boolean = false
+    private var devices: MutableList<Device> = mutableListOf<Device>()
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("ShowToast")
@@ -59,9 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setSupportActionBar(binding.appBarMain.toolbar)
-
         binding.appBarMain.fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
@@ -72,10 +69,7 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow),
-            drawerLayout
-        )
+        appBarConfiguration = AppBarConfiguration(setOf(R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow), drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
@@ -90,25 +84,17 @@ class MainActivity : AppCompatActivity() {
         )
 
         enableSystemService(bluetoothAdapter.isEnabled, BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        enableSystemService(
-            locationManager.isLocationEnabled,
-            Settings.ACTION_LOCATION_SOURCE_SETTINGS
-        )
-
-
+        enableSystemService(locationManager.isLocationEnabled, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
     }
 
 
     private fun enableSystemService(isEnabled: Boolean, actionRequest: String) {
         if (!isEnabled) {
             val enableBtIntent = Intent(actionRequest)
-            val enableLauncher = registerForActivityResult(
-                ActivityResultContracts.StartActivityForResult()
-            ) { }
+            val enableLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
             enableLauncher.launch(enableBtIntent)
         }
     }
-
 
     fun onClick(view: View) {
         scanLeDevice()
@@ -126,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         val permissionCheck = ContextCompat.checkSelfPermission(this, cur_permission!!)
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, cur_permission!!)) {
-                showExplanation("Permission Needed", "Rationale", cur_permission!!, REQUEST_PERMISSION_BLE)
+                //showExplanation("Permission Needed", "Rationale", cur_permission!!, REQUEST_PERMISSION_BLE)
             }
             else {
                 requestPermission(cur_permission!!, REQUEST_PERMISSION_BLE)
@@ -174,7 +160,18 @@ class MainActivity : AppCompatActivity() {
     private val leScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-            Toast.makeText(applicationContext, result.device.address, Toast.LENGTH_SHORT).show()
+            if (Build.VERSION.SDK_INT >= 31 &&
+                ActivityCompat.checkSelfPermission(this@MainActivity, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(applicationContext, "New Android!", Toast.LENGTH_SHORT).show()
+                // TODO: Consider calling ActivityCompat#requestPermissions
+            }
+            else {
+                val cur_address: MacAddress = MacAddress(result.device.address)
+                val cur_device: Device = Device(cur_address, "")
+                if (!devices.contains(cur_device)) {
+                    devices.add(cur_device)
+                }
+            }
         }
     }
 
@@ -188,9 +185,9 @@ class MainActivity : AppCompatActivity() {
                     // TODO: Consider calling ActivityCompat#requestPermissions
                 }
                 bluetoothLeScanner.stopScan(leScanCallback)
+                Toast.makeText(applicationContext, "Devices:\n" + devices.joinToString("\n") { it.toString() }, Toast.LENGTH_LONG).show()
             }, SCAN_PERIOD)
             scanning = true
-            Toast.makeText(applicationContext, Build.VERSION.SDK_INT.toString(), Toast.LENGTH_SHORT).show()
             bluetoothLeScanner.startScan(leScanCallback)
         }
         else {
@@ -198,7 +195,6 @@ class MainActivity : AppCompatActivity() {
             bluetoothLeScanner.stopScan(leScanCallback)
         }
     }
-
 
 }
 

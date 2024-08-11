@@ -1,5 +1,7 @@
 package com.example.elm327.elm
 
+import com.example.elm327.Device
+
 class MacAddress(source: String) {
     private val validatedMacAddress: String
 
@@ -14,12 +16,22 @@ class MacAddress(source: String) {
             }
 
             else -> {
-                this.validatedMacAddress = ""
+                this.validatedMacAddress = source
             }
         }
     }
 
-    public fun getAsString(): String {
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (other is MacAddress && this.validatedMacAddress == other.validatedMacAddress) {
+            return true
+        }
+        return false
+    }
+
+    override fun toString(): String {
         return validatedMacAddress
     }
 

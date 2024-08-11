@@ -20,7 +20,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Elm327"
-        tools:targetApi="29">
+        tools:targetApi="30">
         <activity
             android:name=".MainActivity"
             android:exported="true"
