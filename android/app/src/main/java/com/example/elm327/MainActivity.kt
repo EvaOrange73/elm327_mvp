@@ -3,17 +3,19 @@ package com.example.elm327
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
+import android.provider.Settings
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -40,9 +42,17 @@ class MainActivity : AppCompatActivity() {
     private val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
     private val handler = Handler()
 
+    private val locationManager by lazy {
+        applicationContext.getSystemService(
+            LOCATION_SERVICE
+        ) as LocationManager
+    }
+
+
     private var cur_permission: String? = null
     private var scanning = false
 
+    @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("ShowToast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,19 +72,43 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        appBarConfiguration = AppBarConfiguration(setOf(R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow), drawerLayout)
+        appBarConfiguration = AppBarConfiguration(
+            setOf(R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow),
+            drawerLayout
+        )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        this.showPermissionState(arrayOf(Manifest.permission.BLUETOOTH,
-                                         Manifest.permission.BLUETOOTH_ADMIN,
-                                         Manifest.permission.ACCESS_FINE_LOCATION,
-                                         Manifest.permission.ACCESS_COARSE_LOCATION,
-                                         Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                                         ))
+        this.showPermissionState(
+            arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            )
+        )
+
+        enableSystemService(bluetoothAdapter.isEnabled, BluetoothAdapter.ACTION_REQUEST_ENABLE)
+        enableSystemService(
+            locationManager.isLocationEnabled,
+            Settings.ACTION_LOCATION_SOURCE_SETTINGS
+        )
 
 
     }
+
+
+    private fun enableSystemService(isEnabled: Boolean, actionRequest: String) {
+        if (!isEnabled) {
+            val enableBtIntent = Intent(actionRequest)
+            val enableLauncher = registerForActivityResult(
+                ActivityResultContracts.StartActivityForResult()
+            ) { }
+            enableLauncher.launch(enableBtIntent)
+        }
+    }
+
 
     fun onClick(view: View) {
         scanLeDevice()
@@ -164,7 +198,6 @@ class MainActivity : AppCompatActivity() {
             bluetoothLeScanner.stopScan(leScanCallback)
         }
     }
-
 
 
 }
