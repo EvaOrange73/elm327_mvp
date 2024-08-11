@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -29,13 +30,18 @@ import com.google.android.material.snackbar.Snackbar
 
 
 class MainActivity : AppCompatActivity() {
+    private val REQUEST_PERMISSION_BLE = 1
+    private val SCAN_PERIOD: Long = 10000
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private val REQUEST_PERMISSION_BLE = 1
-    private var cur_permission: String? = null
 
     private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    private val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+    private val handler = Handler()
+
+    private var cur_permission: String? = null
+    private var scanning = false
 
     @SuppressLint("ShowToast")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,11 +62,7 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
-            ), drawerLayout
-        )
+        appBarConfiguration = AppBarConfiguration(setOf(R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow), drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
@@ -71,12 +73,11 @@ class MainActivity : AppCompatActivity() {
                                          Manifest.permission.ACCESS_BACKGROUND_LOCATION
                                          ))
 
-        scanLeDevice()
 
     }
 
     fun onClick(view: View) {
-        Toast.makeText(this@MainActivity, "Button clicked!", Toast.LENGTH_SHORT).show()
+        scanLeDevice()
     }
 
     private fun showPermissionState(permissions: Array<String>) {
@@ -96,7 +97,8 @@ class MainActivity : AppCompatActivity() {
             else {
                 requestPermission(cur_permission!!, REQUEST_PERMISSION_BLE)
             }
-        } else {
+        }
+        else {
             Toast.makeText(this@MainActivity, "Permission ${cur_permission!!.split('.').last()} already Granted!", Toast.LENGTH_SHORT).show()
         }
     }
@@ -135,42 +137,29 @@ class MainActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf(permissionName), permissionRequestCode)
     }
 
-
-    private val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-    private var scanning = false
-    private val handler = Handler()
-
-//    private val leDeviceListAdapter = LeDeviceListAdapter()
-    // Device scan callback.
     private val leScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             Toast.makeText(applicationContext, result.device.address, Toast.LENGTH_SHORT).show()
-//            leDeviceListAdapter.addDevice(result.device)
-//            leDeviceListAdapter.notifyDataSetChanged()
         }
     }
 
-    // Stops scanning after 10 seconds.
-    private val SCAN_PERIOD: Long = 10000
-
     private fun scanLeDevice() {
-        if (!scanning) { // Stops scanning after a pre-defined scan period.
+        if (!scanning) {
             handler.postDelayed({
                 scanning = false
-                if (Build.VERSION.SDK_INT >= 30 && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.BLUETOOTH_SCAN
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
+                if (Build.VERSION.SDK_INT >= 31 &&
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(applicationContext, "New Android!", Toast.LENGTH_SHORT).show()
+                    // TODO: Consider calling ActivityCompat#requestPermissions
                 }
                 bluetoothLeScanner.stopScan(leScanCallback)
             }, SCAN_PERIOD)
             scanning = true
+            Toast.makeText(applicationContext, Build.VERSION.SDK_INT.toString(), Toast.LENGTH_SHORT).show()
             bluetoothLeScanner.startScan(leScanCallback)
-        } else {
+        }
+        else {
             scanning = false
             bluetoothLeScanner.stopScan(leScanCallback)
         }

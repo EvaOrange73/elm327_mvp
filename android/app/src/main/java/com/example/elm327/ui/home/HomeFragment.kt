@@ -42,10 +42,10 @@ class HomeFragment : Fragment() {
             textView.text = it
         }
 
-        val button = binding.button1
-        button.setOnClickListener {
-            Toast.makeText(activity, "Bluetooth is disabled", Toast.LENGTH_SHORT).show()
-        }
+//        val button = binding.button1
+//        button.setOnClickListener {
+//            Toast.makeText(activity, "Bluetooth is disabled", Toast.LENGTH_SHORT).show()
+//        }
 
         return root
     }
