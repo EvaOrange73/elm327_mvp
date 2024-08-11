@@ -28,7 +28,7 @@ class BleService : Service() {
 
     private val SCAN_PERIOD: Long = 3000
 
-    private var scanning: State<Boolean> = State<Boolean>(false)
+    var scanning: State<Boolean> = State<Boolean>(false)
 
     private val devices: MutableSet<Device> = mutableSetOf()
 
@@ -41,16 +41,8 @@ class BleService : Service() {
         val service: BleService
             get() = this@BleService
 
-        fun setChangeColorCallback(changeColorCallback: (Int) -> Unit) {
-            this@BleService.scanning.bindOnSet { newValue: Boolean ->
-                if (newValue) {
-                    Log.i(LOG_TAG, "color changed to red")
-                    changeColorCallback(Color.RED)
-                } else {
-                    Log.i(LOG_TAG, "color changed to green")
-                    changeColorCallback(Color.GREEN)
-                }
-            }
+        fun setChangeColorCallback(changeColorCallback: (Boolean) -> Unit) {
+            this@BleService.scanning.bindOnSet(changeColorCallback)
         }
     }
 

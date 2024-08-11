@@ -91,36 +91,37 @@ class MainActivity : AppCompatActivity() {
 
 
         enableSystemService(bluetoothAdapter.isEnabled, BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        enableSystemService(
-            locationManager.isLocationEnabled,
-            Settings.ACTION_LOCATION_SOURCE_SETTINGS
-        )
-
-        val bleServiceIntent = Intent(this, BleService::class.java)
-        startService(bleServiceIntent)
-        val serviceConnection = object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-                Log.d(LOG_TAG, "MainActivity onServiceConnected")
-                bleService = (binder as BleService.BleBinder).service
-                binder.setChangeColorCallback { color -> findViewById<Button>(R.id.button).setBackgroundColor(color) }
-                bound = true
-            }
-
-            override fun onServiceDisconnected(name: ComponentName) {
-                Log.d(LOG_TAG, "MainActivity onServiceDisconnected")
-                bound = false
-            }
-        }
-        bindService(bleServiceIntent, serviceConnection, 0)
+        enableSystemService(locationManager.isLocationEnabled, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
-    private fun checkServices(): Boolean {
-        if (bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
-            changeButtonColor(Color.RED)
-            return false
+    private fun checkServices() {
+        if (bleService == null && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
+            val bleServiceIntent = Intent(this, BleService::class.java)
+            startService(bleServiceIntent)
+            val serviceConnection = object : ServiceConnection {
+                override fun onServiceConnected(name: ComponentName, binder: IBinder) {
+                    Log.d(LOG_TAG, "MainActivity onServiceConnected")
+                    bleService = (binder as BleService.BleBinder).service
+                    binder.setChangeColorCallback { newValue: Boolean ->
+                        if (newValue) {
+                            findViewById<Button>(R.id.button).setBackgroundColor(Color.RED)
+                        }
+                        else {
+                            findViewById<Button>(R.id.button).setBackgroundColor(Color.GREEN)
+                        }
+                    }
+                    bound = true
+                    bleService!!.scanning.setValue(false)
+                }
+
+                override fun onServiceDisconnected(name: ComponentName) {
+                    Log.d(LOG_TAG, "MainActivity onServiceDisconnected")
+                    bound = false
+                }
+            }
+            bindService(bleServiceIntent, serviceConnection, 0)
         }
-        return true
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -136,18 +137,9 @@ class MainActivity : AppCompatActivity() {
         bleService!!.scanLeDevice()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String?>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-    private fun changeButtonColor(color: Int) {
-        Log.i("changeButtonColor", "color changed")
-        findViewById<Button>(R.id.button).setBackgroundColor(color)
     }
 }
 
