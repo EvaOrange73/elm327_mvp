@@ -30,7 +30,9 @@ class BleService : Service() {
 
     var scanning: State<Boolean> = State<Boolean>(false)
 
-    private val devices: MutableSet<Device> = mutableSetOf()
+    private val devices: MutableList<Device> = mutableListOf()
+
+    private var spinnerListCallback: (List<String>) -> Unit = {}
 
 
     override fun onBind(intent: Intent?): IBinder {
@@ -43,6 +45,10 @@ class BleService : Service() {
 
         fun setChangeColorCallback(changeColorCallback: (Boolean) -> Unit) {
             this@BleService.scanning.bindOnSet(changeColorCallback)
+        }
+
+        fun setSpinnerListCallback(callback: (List<String>) -> Unit){
+            this@BleService.spinnerListCallback = callback
         }
     }
 
@@ -65,12 +71,12 @@ class BleService : Service() {
             } else {
                 val curAddress: MacAddress = MacAddress(result.device.address)
                 val curDevice: Device = Device(curAddress, "")
-                devices.add(curDevice)
+                if (!devices.contains(curDevice)) devices.add(curDevice)
             }
         }
     }
 
-    public fun scanLeDevice() {
+    fun scanLeDevice() {
         if (!scanning.getValue()) {
             handler.postDelayed({
                 scanning.setValue(false)
@@ -84,11 +90,8 @@ class BleService : Service() {
                     // TODO: Consider calling ActivityCompat#requestPermissions
                 }
                 bluetoothLeScanner.stopScan(leScanCallback)
-                Toast.makeText(
-                    applicationContext,
-                    "Devices:\n" + devices.joinToString("\n") { it.toString() },
-                    Toast.LENGTH_LONG
-                ).show()
+                spinnerListCallback(devices.map { it.toString() })
+                Log.i(LOG_TAG, devices.size.toString())
             }, SCAN_PERIOD)
             scanning.setValue(true)
             bluetoothLeScanner.startScan(leScanCallback)
@@ -97,7 +100,6 @@ class BleService : Service() {
             bluetoothLeScanner.stopScan(leScanCallback)
         }
     }
-
 }
 
 

@@ -1,16 +1,10 @@
 package com.example.elm327
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanResult
 import android.content.ComponentName
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
@@ -19,22 +13,19 @@ import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.PackageManagerCompat.LOG_TAG
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.elm327.databinding.ActivityMainBinding
-import com.example.elm327.elm.MacAddress
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
@@ -110,6 +101,21 @@ class MainActivity : AppCompatActivity() {
                         else {
                             findViewById<Button>(R.id.button).setBackgroundColor(Color.GREEN)
                         }
+                    }
+                    binder.setSpinnerListCallback {
+                            arraySpinner ->
+                        if (arraySpinner.isEmpty()) {
+                            Toast.makeText(applicationContext, "no devices found", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val spinner = findViewById<Spinner>(R.id.spinner)
+                            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
+                                this@MainActivity,
+                                android.R.layout.simple_spinner_item, arraySpinner
+                            )
+                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                            spinner.adapter = adapter
+                        }
+
                     }
                     bound = true
                     bleService!!.scanning.setValue(false)
