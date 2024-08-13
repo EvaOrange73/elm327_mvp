@@ -19,6 +19,10 @@
 <!--        <item>Read supported PIDs</item>-->
 <!--        <item>Send to server</item>-->
 <!--    </string-array>-->
-    <string name="start">Start</string>
-<!--    <string name="restart">Restart</string>-->
+    <string name="start">start scan</string>
+    <string name="scanning">scanning…</string>
+    <string name="select_mac_address">Select mac address:</string>
+    <string name="connect">connect</string>
+    <string name="disconnect">disconnect</string>
+    <!--    <string name="restart">Restart</string>-->
 </resources>

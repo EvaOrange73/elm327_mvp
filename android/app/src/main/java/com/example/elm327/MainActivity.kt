@@ -96,10 +96,12 @@ class MainActivity : AppCompatActivity() {
                     bleService = (binder as BleService.BleBinder).service
                     binder.setChangeColorCallback { newValue: Boolean ->
                         if (newValue) {
-                            findViewById<Button>(R.id.button).setBackgroundColor(Color.RED)
+                            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GRAY)
+                            findViewById<Button>(R.id.button1).text =  getString(R.string.scanning)
                         }
                         else {
-                            findViewById<Button>(R.id.button).setBackgroundColor(Color.GREEN)
+                            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GREEN)
+                            findViewById<Button>(R.id.button1).text =  getString(R.string.start)
                         }
                     }
                     binder.setSpinnerListCallback {
