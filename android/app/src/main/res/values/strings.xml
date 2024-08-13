@@ -24,5 +24,14 @@
     <string name="select_mac_address">Select mac address:</string>
     <string name="connect">connect</string>
     <string name="disconnect">disconnect</string>
+    <string name="car_id">Car id</string>
     <!--    <string name="restart">Restart</string>-->
+
+
+    <string-array name="filter">
+        <item>all</item>
+        <item>dashboard</item>
+        <item>fuel</item>
+    </string-array>
+
 </resources>
