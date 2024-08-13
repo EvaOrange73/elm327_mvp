@@ -1,4 +1,4 @@
-package com.example.elm327.ui.home
+package com.example.elm327.ui.scan
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,12 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.elm327.databinding.FragmentHomeBinding
+import com.example.elm327.databinding.FragmentScanBinding
 
 
-class HomeFragment : Fragment() {
+class ScanFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentScanBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -22,10 +22,10 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
+        val scanViewModel =
+            ViewModelProvider(this).get(ScanViewModel::class.java)
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentScanBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         return root
