@@ -94,31 +94,8 @@ class MainActivity : AppCompatActivity() {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                     Log.d(LOG_TAG, "MainActivity onServiceConnected")
                     bleService = (binder as BleService.BleBinder).service
-                    binder.setChangeColorCallback { newValue: Boolean ->
-                        if (newValue) {
-                            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GRAY)
-                            findViewById<Button>(R.id.button1).text =  getString(R.string.scanning)
-                        }
-                        else {
-                            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GREEN)
-                            findViewById<Button>(R.id.button1).text =  getString(R.string.start)
-                        }
-                    }
-                    binder.setSpinnerListCallback {
-                            arraySpinner ->
-                        if (arraySpinner.isEmpty()) {
-                            Toast.makeText(applicationContext, "no devices found", Toast.LENGTH_SHORT).show()
-                        } else {
-                            val spinner = findViewById<Spinner>(R.id.spinner)
-                            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
-                                this@MainActivity,
-                                android.R.layout.simple_spinner_item, arraySpinner
-                            )
-                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                            spinner.adapter = adapter
-                        }
-
-                    }
+                    binder.setChangeColorCallback(::buttonCallback)
+                    binder.setSpinnerListCallback(::spinnerCallback)
                     bound = true
                     bleService!!.scanning.setValue(false)
                 }
@@ -129,6 +106,29 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             bindService(bleServiceIntent, serviceConnection, 0)
+        }
+    }
+
+    fun buttonCallback(newValue: Boolean) {
+        if (newValue) {
+            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GRAY)
+            findViewById<Button>(R.id.button1).text =  getString(R.string.scanning)
+        }
+        else {
+            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GREEN)
+            findViewById<Button>(R.id.button1).text =  getString(R.string.start)
+        }
+    }
+
+    fun spinnerCallback(arraySpinner: List<String>) {
+        if (arraySpinner.isEmpty()) {
+            Toast.makeText(applicationContext, "no devices found", Toast.LENGTH_SHORT).show()
+        }
+        else {
+            val spinner = findViewById<Spinner>(R.id.spinner)
+            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_spinner_item, arraySpinner)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner.adapter = adapter
         }
     }
 

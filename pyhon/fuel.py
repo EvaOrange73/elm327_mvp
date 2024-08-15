@@ -2,6 +2,7 @@ import time
 import warnings
 from bleak import *
 import commands
+import matplotlib
 
 warnings.filterwarnings('ignore')
 # ADDRESS = "00:10:CC:4F:36:03"  # синий
@@ -39,7 +40,7 @@ async def main():
                 elif pid == 'OC':
                     cur_rpm = decoded
                 elif pid == 'OF':
-                    cur_iat =decoded
+                    cur_iat = decoded
             else:
                 log = output + '\n'
             print(output + "\n", sep='', end='')
@@ -66,15 +67,22 @@ async def main():
             await send('010B\r')  # MAP
             await send('010C\r')  # RPM
             await send('010F\r')  # IAT
-            # cur_time = time.time_ns()
-            # await asyncio.sleep(1)
-            # delta_time = cur_time - prev_time
-            # liters_spent_1 += delta_time * cur_maf / 12556000000
-            # cur_maf = (cur_rpm * cur_map + 2 * 28.97) / (12000 * 8.314 * cur_iat)
-            # liters_spent_2 += delta_time * cur_maf / 12556000000
-            # print(round(liters_spent_1, 5), round(liters_spent_2, 5))
-            # prev_time = cur_time
+			if cur_iat != 0:
+		        cur_time = time.time_ns()
+		        await asyncio.sleep(1)
+		        delta_time = cur_time - prev_time
+		        liters_spent_1 += delta_time * cur_maf / 12556000000
+				x.append(cur_time)
+				y.append(delta_time * cur_maf / 12556000000)
+		        cur_maf = (cur_rpm * cur_map + 2 * 28.97) / (12000 * 8.314 * cur_iat)
+		        liters_spent_2 += delta_time * cur_maf / 12556000000
+		        print(round(liters_spent_1, 5), round(liters_spent_2, 5))
+				matplotlib.pyplot.plot(x, y)
+				matplotlib.pyplot.show()
+		        prev_time = cur_time
 
 
 if __name__ == "__main__":
+	x = []
+	y = []
     asyncio.run(main())
