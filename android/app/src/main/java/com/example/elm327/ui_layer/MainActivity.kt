@@ -1,23 +1,18 @@
-package com.example.elm327
+package com.example.elm327.ui_layer
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
-import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
-import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -25,7 +20,10 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.elm327.R
 import com.example.elm327.databinding.ActivityMainBinding
+import com.example.elm327.util.Permissions
+import com.example.elm327.ui_layer.viewModels.BleViewModel
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
@@ -46,6 +44,9 @@ class MainActivity : AppCompatActivity() {
 
     var bound = false;
     var bleService: BleService? = null
+
+
+    private val bleViewModel: BleViewModel by viewModels()
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("ShowToast")
@@ -87,17 +88,14 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.P)
     private fun checkServices() {
-        if (bleService == null && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
+        if (!bound && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
             val bleServiceIntent = Intent(this, BleService::class.java)
             startService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                     Log.d(LOG_TAG, "MainActivity onServiceConnected")
                     bleService = (binder as BleService.BleBinder).service
-                    binder.setChangeColorCallback(::buttonCallback)
-                    binder.setSpinnerListCallback(::spinnerCallback)
                     bound = true
-                    bleService!!.scanning.setValue(false)
                 }
 
                 override fun onServiceDisconnected(name: ComponentName) {
@@ -106,29 +104,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             bindService(bleServiceIntent, serviceConnection, 0)
-        }
-    }
-
-    fun buttonCallback(newValue: Boolean) {
-        if (newValue) {
-            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GRAY)
-            findViewById<Button>(R.id.button1).text =  getString(R.string.scanning)
-        }
-        else {
-            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GREEN)
-            findViewById<Button>(R.id.button1).text =  getString(R.string.start)
-        }
-    }
-
-    fun spinnerCallback(arraySpinner: List<String>) {
-        if (arraySpinner.isEmpty()) {
-            Toast.makeText(applicationContext, "no devices found", Toast.LENGTH_SHORT).show()
-        }
-        else {
-            val spinner = findViewById<Spinner>(R.id.spinner)
-            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_spinner_item, arraySpinner)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = adapter
         }
     }
 
@@ -141,13 +116,18 @@ class MainActivity : AppCompatActivity() {
         checkServices()
     }
 
-    fun onClick(view: View) {
-        bleService!!.scanLeDevice()
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+
+    fun startScan() {
+        Log.i(LOG_TAG, "start scan")
+        if (bound) {
+            bleService!!.scanLeDevice()
+            bleViewModel.startScan()
+        }
     }
 }
 

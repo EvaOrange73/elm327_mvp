@@ -1,6 +1,6 @@
 package com.example.elm327
 
-import com.example.elm327.elm.ObdPids
+import com.example.elm327.util.elm.ObdPids
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

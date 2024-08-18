@@ -22,7 +22,7 @@
         android:theme="@style/Theme.Elm327"
         tools:targetApi="30">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui_layer.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Elm327.NoActionBar">
@@ -34,7 +34,7 @@
         </activity>
 
         <service
-            android:name=".BleService"
+            android:name=".ui_layer.BleService"
             android:enabled="true"
             android:exported="false" />
     </application>

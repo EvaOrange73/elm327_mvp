@@ -1,4 +1,4 @@
-package com.example.elm327.elm
+package com.example.elm327.util.elm
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
