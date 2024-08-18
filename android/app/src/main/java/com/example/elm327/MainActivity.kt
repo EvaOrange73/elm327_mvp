@@ -5,19 +5,14 @@ import android.bluetooth.BluetoothAdapter
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
-import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
-import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -26,6 +21,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.elm327.databinding.ActivityMainBinding
+import com.example.elm327.services.BleService
+import com.example.elm327.util.Permissions
+import com.example.elm327.viewModels.BleViewModel
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
@@ -46,6 +44,9 @@ class MainActivity : AppCompatActivity() {
 
     var bound = false;
     var bleService: BleService? = null
+
+
+    private val bleViewModel: BleViewModel by viewModels()
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("ShowToast")
@@ -125,6 +126,7 @@ class MainActivity : AppCompatActivity() {
         Log.i(LOG_TAG, "start scan")
         if (bound) {
             bleService!!.scanLeDevice()
+            bleViewModel.startScan()
         }
     }
 }

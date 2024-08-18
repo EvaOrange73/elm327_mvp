@@ -1,6 +1,4 @@
-package com.example.elm327.elm
-
-import com.example.elm327.Device
+package com.example.elm327.data
 
 class MacAddress(source: String) {
     private val validatedMacAddress: String

@@ -1,10 +1,6 @@
-package com.example.elm327
-import android.text.BoringLayout
-import com.example.elm327.elm.MacAddress
+package com.example.elm327.data
 
-class Device(address: MacAddress, name: String = "") {
-    private val address: MacAddress = address
-    private val name: String = name
+class Device(val address: MacAddress, val name: String = "") {
 
     override fun equals(other: Any?): Boolean {
         if (other == null) {

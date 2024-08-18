@@ -1,11 +1,10 @@
-package com.example.elm327.ui.carInfo
+package com.example.elm327.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.example.elm327.databinding.FragmentCarInfoBinding
 
 class CarInfoFragment : Fragment() {
@@ -21,9 +20,6 @@ class CarInfoFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val carInfoViewModel =
-            ViewModelProvider(this).get(CarInfoViewModel::class.java)
-
         _binding = FragmentCarInfoBinding.inflate(inflater, container, false)
         val root: View = binding.root
 

@@ -1,4 +1,4 @@
-package com.example.elm327
+package com.example.elm327.services
 
 import android.Manifest
 import android.app.Service
@@ -8,16 +8,15 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Binder
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
-import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.example.elm327.elm.MacAddress
+import com.example.elm327.data.Device
+import com.example.elm327.data.MacAddress
 
 class BleService : Service() {
     private val LOG_TAG = "BleService"

@@ -1,4 +1,4 @@
-package com.example.elm327
+package com.example.elm327.util
 
 class State<Type>(private var value: Type) {
     private var onGet: MutableList<(value: Type) -> Unit> = mutableListOf<(value: Type) -> Unit>()
