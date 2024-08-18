@@ -1,5 +1,5 @@
-package com.example.elm327.elm
-import com.example.elm327.elm.ObdPids.NO_PID_FOUND
+package com.example.elm327.util.elm
+
 
 enum class FuelType(val num: ULong, val descrtiption: String) {
     NOT_AVAILABLE(0u, "Not available"),
@@ -237,7 +237,7 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
 enum class Decoders(val decode: (String) -> DecodedValue) {
 
     DEFAULT({ value -> RawData(value) }),
-    BOOLEAN({ value -> SingleValue(Parser(value).bits[0].toDouble(), Printers.BOOLEAN) }),
+    BOOLEAN({ value -> SingleValue(Parser(value).bits[7].toDouble(), Printers.BOOLEAN) }),
     INTEGER({ value -> SingleValue(Parser(value).A, Printers.PLAIN) }),
     AIR_FUEL_RATIO({ value -> SingleValue(Parser(value).AB / 32768, Printers.PLAIN) }),
     PERCENT({ value -> SingleValue(Parser(value).A * 100 / 255, Printers.PERCENTAGE) }),
@@ -264,22 +264,24 @@ enum class Decoders(val decode: (String) -> DecodedValue) {
     RUN_TIME_MIN({ value -> SingleValue(Parser(value).AB * 60, Printers.TIME) }),
     DISTANCE({ value -> SingleValue(Parser(value).AB, Printers.DISTANCE) }),
 
-    SENSOR_VOLTAGE({ value -> TwoValues(Parser(value).A / 200, (Parser(value).B * 100 / 128) - 100, Printers.VOLTAGE_AND_PERCENTAGE)}),
-    OXYGEN_VOLTAGE({ value -> TwoValues(Parser(value).AB / 32768, Parser(value).CD / 8192, Printers.RATIO_AND_VOLTAGE)}),
-    OXYGEN_SENSOR({ value -> TwoValues(Parser(value).AB / 32768, Parser(value).CD / 256 - 128, Printers.RATIO_AND_MILLIAMPERE)}),
-    TWO_PERCENT_CENTERED({ value -> TwoValues((Parser(value).A * 100 / 128) - 100, (Parser(value).B * 100 / 128) - 100, Printers.TWO_PERCENTS)}),
+    SENSOR_VOLTAGE({ value -> TwoValues(Parser(value).A / 200, (Parser(value).B * 100 / 128) - 100, Printers.VOLTAGE_AND_PERCENTAGE) }),
+    OXYGEN_VOLTAGE({ value -> TwoValues(Parser(value).AB / 32768, Parser(value).CD / 8192, Printers.RATIO_AND_VOLTAGE) }),
+    OXYGEN_SENSOR({ value -> TwoValues(Parser(value).AB / 32768, Parser(value).CD / 256 - 128, Printers.RATIO_AND_MILLIAMPERE) }),
+    TWO_PERCENT_CENTERED({ value -> TwoValues((Parser(value).A * 100 / 128) - 100, (Parser(value).B * 100 / 128) - 100, Printers.TWO_PERCENTS) }),
 
-    MAX_VALUES({ value -> FourValues(Parser(value).A, Parser(value).B, Parser(value).C, Parser(value).D * 10, Printers.MAX_VALUES)}),
+    MAX_VALUES({ value -> FourValues(Parser(value).A, Parser(value).B, Parser(value).C, Parser(value).D * 10, Printers.MAX_VALUES) }),
 
-    SENSORS_1_8({ value -> EightValues(Parser(value).bits[0].toDouble(), Parser(value).bits[1].toDouble(), Parser(value).bits[2].toDouble(), Parser(value).bits[3].toDouble(),
-                                                 Parser(value).bits[4].toDouble(), Parser(value).bits[5].toDouble(), Parser(value).bits[6].toDouble(), Parser(value).bits[7].toDouble(), Printers.SENSORS_1_8)}),
-    SENSORS_1_8_ALT({ value -> EightValues(Parser(value).bits[0].toDouble(), Parser(value).bits[1].toDouble(), Parser(value).bits[2].toDouble(), Parser(value).bits[3].toDouble(),
-                                                     Parser(value).bits[4].toDouble(), Parser(value).bits[5].toDouble(), Parser(value).bits[6].toDouble(), Parser(value).bits[7].toDouble(), Printers.SENSORS_1_8)}),
+    SENSORS_1_8({ value -> EightValues(Parser(value).bits[7].toDouble(), Parser(value).bits[6].toDouble(), Parser(value).bits[5].toDouble(), Parser(value).bits[4].toDouble(),
+                                                 Parser(value).bits[3].toDouble(), Parser(value).bits[2].toDouble(), Parser(value).bits[1].toDouble(), Parser(value).bits[0].toDouble(), Printers.SENSORS_1_8)
+    }),
+    SENSORS_1_8_ALT({ value -> EightValues(Parser(value).bits[7].toDouble(), Parser(value).bits[6].toDouble(), Parser(value).bits[5].toDouble(), Parser(value).bits[4].toDouble(),
+                                                     Parser(value).bits[3].toDouble(), Parser(value).bits[2].toDouble(), Parser(value).bits[1].toDouble(), Parser(value).bits[0].toDouble(), Printers.SENSORS_1_8)
+    }),
 
-    FUEL_TYPE({ value -> FuelValue(FuelType[Parser(value).A.toULong()], Printers.FUEL_TYPE)}),
-    OBD_STANDARDS({ value -> OBDStandardValue(OBDStandards[Parser(value).A.toULong()], Printers.OBD_STANDARDS)}),
-    FUEL_SYSTEM_STATUS({ value -> FuelSystemStatusValue(FuelSystemStatus[Parser(value).A.toULong()], FuelSystemStatus[Parser(value).B.toULong()], Printers.FUEL_SYSTEM_STATUS)}),
-    AIR_STATUS({ value -> AirStatusValue(AirStatus[Parser(value).A.toULong()], Printers.AIR_STATUS)}),
+    FUEL_TYPE({ value -> FuelValue(FuelType[Parser(value).A.toULong()], Printers.FUEL_TYPE) }),
+    OBD_STANDARDS({ value -> OBDStandardValue(OBDStandards[Parser(value).A.toULong()], Printers.OBD_STANDARDS) }),
+    FUEL_SYSTEM_STATUS({ value -> FuelSystemStatusValue(FuelSystemStatus[Parser(value).A.toULong()], FuelSystemStatus[Parser(value).B.toULong()], Printers.FUEL_SYSTEM_STATUS) }),
+    AIR_STATUS({ value -> AirStatusValue(AirStatus[Parser(value).A.toULong()], Printers.AIR_STATUS) }),
 
     PIDS_01_20({ value -> PidsList(Parser(value).bits, 1, Printers.PIDS_01_20) }),
     PIDS_21_40({ value -> PidsList(Parser(value).bits, 21, Printers.PIDS_21_40) }),
@@ -319,7 +321,8 @@ class SingleValue(val singleValue: Double, printer: Printers) : DecodedValue(pri
 class TwoValues(val first: Double, val second: Double, printer: Printers) : DecodedValue(printer)
 class FourValues(val first: Double, val second: Double, val third: Double, val fourth: Double, printer: Printers) : DecodedValue(printer)
 class EightValues(val first: Double, val second: Double, val third: Double, val fourth: Double,
-                  val fifth: Double, val sixth: Double, val seventh: Double, val eighth: Double, printer: Printers) : DecodedValue(printer)
+                  val fifth: Double, val sixth: Double, val seventh: Double, val eighth: Double, printer: Printers
+                 ) : DecodedValue(printer)
 class PidsList(val pids: List<UInt>, firstPidNumber: Int, printer: Printers) :
     DecodedValue(printer) {
     val hexList = List(32) {
