@@ -1,4 +1,4 @@
-package com.example.elm327.fragments
+package com.example.elm327.ui_layer.fragments
 
 import android.graphics.Color
 import android.os.Bundle
@@ -13,12 +13,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.elm327.data.Device
-import com.example.elm327.MainActivity
+import com.example.elm327.data_layer.model.Device
+import com.example.elm327.ui_layer.MainActivity
 import com.example.elm327.R
 import com.example.elm327.databinding.FragmentScanBinding
-import com.example.elm327.viewModels.BleViewModel
-import com.example.elm327.viewModels.ScanState
+import com.example.elm327.ui_layer.viewModels.BleViewModel
+import com.example.elm327.ui_layer.viewModels.ScanState
 import kotlinx.coroutines.launch
 
 

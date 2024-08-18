@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.elm327.MainActivity
+import com.example.elm327.ui_layer.MainActivity
 
 class Permissions(private val mainActivity: MainActivity) {
     private var curPermission: String? = null

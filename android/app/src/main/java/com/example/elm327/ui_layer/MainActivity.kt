@@ -1,4 +1,4 @@
-package com.example.elm327
+package com.example.elm327.ui_layer
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
@@ -20,10 +20,10 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.elm327.R
 import com.example.elm327.databinding.ActivityMainBinding
-import com.example.elm327.services.BleService
 import com.example.elm327.util.Permissions
-import com.example.elm327.viewModels.BleViewModel
+import com.example.elm327.ui_layer.viewModels.BleViewModel
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 

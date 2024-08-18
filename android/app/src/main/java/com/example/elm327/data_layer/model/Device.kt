@@ -1,4 +1,4 @@
-package com.example.elm327.data
+package com.example.elm327.data_layer.model
 
 class Device(val address: MacAddress, val name: String = "") {
 

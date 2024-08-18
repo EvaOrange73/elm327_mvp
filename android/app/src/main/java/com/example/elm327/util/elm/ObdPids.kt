@@ -1,4 +1,4 @@
-package com.example.elm327.elm
+package com.example.elm327.util.elm
 
 enum class ObdPids(
     val pid: String,

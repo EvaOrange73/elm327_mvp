@@ -1,7 +1,7 @@
-package com.example.elm327.viewModels
+package com.example.elm327.ui_layer.viewModels
 
 import androidx.lifecycle.ViewModel
-import com.example.elm327.data.Device
+import com.example.elm327.data_layer.model.Device
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

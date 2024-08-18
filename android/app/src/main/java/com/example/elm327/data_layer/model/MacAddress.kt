@@ -1,4 +1,4 @@
-package com.example.elm327.data
+package com.example.elm327.data_layer.model
 
 class MacAddress(source: String) {
     private val validatedMacAddress: String

@@ -1,15 +1,15 @@
-package com.example.elm327.fragments
+package com.example.elm327.ui_layer.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.elm327.databinding.FragmentHistoryBinding
+import com.example.elm327.databinding.FragmentCarInfoBinding
 
-class HistoryFragment : Fragment() {
+class CarInfoFragment : Fragment() {
 
-    private var _binding: FragmentHistoryBinding? = null
+    private var _binding: FragmentCarInfoBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -20,8 +20,9 @@ class HistoryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHistoryBinding.inflate(inflater, container, false)
+        _binding = FragmentCarInfoBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
         return root
     }
 

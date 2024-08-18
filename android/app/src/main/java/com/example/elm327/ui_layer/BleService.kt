@@ -1,4 +1,4 @@
-package com.example.elm327.services
+package com.example.elm327.ui_layer
 
 import android.Manifest
 import android.app.Service
@@ -15,8 +15,8 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.example.elm327.data.Device
-import com.example.elm327.data.MacAddress
+import com.example.elm327.data_layer.model.Device
+import com.example.elm327.data_layer.model.MacAddress
 
 class BleService : Service() {
     private val LOG_TAG = "BleService"
