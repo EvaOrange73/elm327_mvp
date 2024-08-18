@@ -87,17 +87,14 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.P)
     private fun checkServices() {
-        if (bleService == null && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
+        if (!bound && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
             val bleServiceIntent = Intent(this, BleService::class.java)
             startService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                     Log.d(LOG_TAG, "MainActivity onServiceConnected")
                     bleService = (binder as BleService.BleBinder).service
-                    binder.setChangeColorCallback(::buttonCallback)
-                    binder.setSpinnerListCallback(::spinnerCallback)
                     bound = true
-                    bleService!!.scanning.setValue(false)
                 }
 
                 override fun onServiceDisconnected(name: ComponentName) {
@@ -106,29 +103,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             bindService(bleServiceIntent, serviceConnection, 0)
-        }
-    }
-
-    fun buttonCallback(newValue: Boolean) {
-        if (newValue) {
-            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GRAY)
-            findViewById<Button>(R.id.button1).text =  getString(R.string.scanning)
-        }
-        else {
-            findViewById<Button>(R.id.button1).setBackgroundColor(Color.GREEN)
-            findViewById<Button>(R.id.button1).text =  getString(R.string.start)
-        }
-    }
-
-    fun spinnerCallback(arraySpinner: List<String>) {
-        if (arraySpinner.isEmpty()) {
-            Toast.makeText(applicationContext, "no devices found", Toast.LENGTH_SHORT).show()
-        }
-        else {
-            val spinner = findViewById<Spinner>(R.id.spinner)
-            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_spinner_item, arraySpinner)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = adapter
         }
     }
 
@@ -141,13 +115,17 @@ class MainActivity : AppCompatActivity() {
         checkServices()
     }
 
-    fun onClick(view: View) {
-        bleService!!.scanLeDevice()
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+
+    fun startScan() {
+        Log.i(LOG_TAG, "start scan")
+        if (bound) {
+            bleService!!.scanLeDevice()
+        }
     }
 }
 

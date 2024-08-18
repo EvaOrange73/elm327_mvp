@@ -28,11 +28,9 @@ class BleService : Service() {
 
     private val SCAN_PERIOD: Long = 3000
 
-    var scanning: State<Boolean> = State<Boolean>(false)
+    var scanning: Boolean = false
 
     private val devices: MutableList<Device> = mutableListOf()
-
-    private var spinnerListCallback: (List<String>) -> Unit = {}
 
 
     override fun onBind(intent: Intent?): IBinder {
@@ -42,14 +40,6 @@ class BleService : Service() {
     inner class BleBinder : Binder() {
         val service: BleService
             get() = this@BleService
-
-        fun setChangeColorCallback(changeColorCallback: (Boolean) -> Unit) {
-            this@BleService.scanning.bindOnSet(changeColorCallback)
-        }
-
-        fun setSpinnerListCallback(callback: (List<String>) -> Unit){
-            this@BleService.spinnerListCallback = callback
-        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -77,9 +67,9 @@ class BleService : Service() {
     }
 
     fun scanLeDevice() {
-        if (!scanning.getValue()) {
+        if (!scanning) {
             handler.postDelayed({
-                scanning.setValue(false)
+                scanning = false
                 if (Build.VERSION.SDK_INT >= 31 &&
                     ActivityCompat.checkSelfPermission(
                         this,
@@ -90,13 +80,12 @@ class BleService : Service() {
                     // TODO: Consider calling ActivityCompat#requestPermissions
                 }
                 bluetoothLeScanner.stopScan(leScanCallback)
-                spinnerListCallback(devices.map { it.toString() })
-                Log.i(LOG_TAG, devices.size.toString())
+                Log.i(LOG_TAG, "Devices: " + devices.joinToString(", ") { it.toString() })
             }, SCAN_PERIOD)
-            scanning.setValue(true)
+            scanning = true
             bluetoothLeScanner.startScan(leScanCallback)
         } else {
-            scanning.setValue(false)
+            scanning = false
             bluetoothLeScanner.stopScan(leScanCallback)
         }
     }
