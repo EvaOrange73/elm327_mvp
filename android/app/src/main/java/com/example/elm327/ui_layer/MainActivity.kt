@@ -12,7 +12,6 @@ import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -23,7 +22,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.elm327.R
 import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
-import com.example.elm327.ui_layer.viewModels.BleViewModel
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
@@ -43,10 +41,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     var bound = false;
-    var bleService: BleService? = null
-
-
-    private val bleViewModel: BleViewModel by viewModels()
+    lateinit var bleStartScan: (() -> Unit)
+    lateinit var bleStopScan: (() -> Unit)
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("ShowToast")
@@ -93,8 +89,9 @@ class MainActivity : AppCompatActivity() {
             startService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-                    Log.d(LOG_TAG, "MainActivity onServiceConnected")
-                    bleService = (binder as BleService.BleBinder).service
+                    binder as BleService.BleBinder
+                    bleStartScan = binder.startScan
+                    bleStopScan = binder.stopScan
                     bound = true
                 }
 
@@ -123,10 +120,14 @@ class MainActivity : AppCompatActivity() {
 
 
     fun startScan() {
-        Log.i(LOG_TAG, "start scan")
         if (bound) {
-            bleService!!.scanLeDevice()
-            bleViewModel.startScan()
+            bleStartScan()
+        }
+    }
+
+    fun stopScan() {
+        if (bound) {
+            bleStopScan()
         }
     }
 }

@@ -7,18 +7,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.elm327.data_layer.model.Device
-import com.example.elm327.ui_layer.MainActivity
 import com.example.elm327.R
+import com.example.elm327.data_layer.BleRepositoryImp
+import com.example.elm327.data_layer.ScanState
+import com.example.elm327.data_layer.model.Device
 import com.example.elm327.databinding.FragmentScanBinding
-import com.example.elm327.ui_layer.viewModels.BleViewModel
-import com.example.elm327.ui_layer.viewModels.ScanState
+import com.example.elm327.ui_layer.MainActivity
+import com.example.elm327.ui_layer.viewModels.ScanFragmentViewModel
 import kotlinx.coroutines.launch
 
 
@@ -27,13 +27,20 @@ class ScanFragment : Fragment() {
 
     private var _binding: FragmentScanBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
+
+    private val bleRepository: BleRepositoryImp by lazy {
+        BleRepositoryImp.getInstance()
+    }
+
+    private val viewModel: ScanFragmentViewModel by lazy {
+        val factory = ScanFragmentViewModel.Factory(bleRepository = bleRepository)
+        ViewModelProviders.of(this, factory)[ScanFragmentViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel: BleViewModel by activityViewModels()
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect {
@@ -64,12 +71,15 @@ class ScanFragment : Fragment() {
         _binding = null
     }
 
-    private fun scanButtonOnClick(){
-        Log.i(LOG_TAG, "scan button clicked")
-        (activity as MainActivity).startScan()
+    private fun scanButtonOnClick() {
+        when (viewModel.uiState.value.scanState) {
+            ScanState.NO_PERMISSIONS -> TODO()
+            ScanState.READY_TO_SCAN -> (activity as MainActivity).startScan()
+            ScanState.SCANNING -> (activity as MainActivity).stopScan()
+        }
     }
 
-    private fun connectButtonOnClick(){
+    private fun connectButtonOnClick() {
         Log.i(LOG_TAG, "connect button clicked")
     }
 
@@ -92,15 +102,13 @@ class ScanFragment : Fragment() {
         }
     }
 
-    private fun updateSpinner(spinnerList: List<Device>){
-        if (spinnerList.isEmpty()) {
-            Toast.makeText(context, "no devices found", Toast.LENGTH_SHORT).show()
-        }
-        else {
-            val spinner = binding.spinner
-            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireActivity().applicationContext, android.R.layout.simple_spinner_item, spinnerList.map { it.address.toString() })
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = adapter
-        }
+    private fun updateSpinner(spinnerList: List<Device>) {
+        val spinner = binding.spinner
+        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
+            requireActivity().applicationContext,
+            android.R.layout.simple_spinner_item,
+            spinnerList.map { it.address.toString() })
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
     }
 }

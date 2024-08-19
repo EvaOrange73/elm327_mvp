@@ -1,6 +1,7 @@
 package com.example.elm327.ui_layer
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.BluetoothLeScanner
@@ -15,6 +16,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.model.Device
 import com.example.elm327.data_layer.model.MacAddress
 
@@ -27,9 +29,12 @@ class BleService : Service() {
 
     private val SCAN_PERIOD: Long = 3000
 
-    var scanning: Boolean = false
 
     private val devices: MutableList<Device> = mutableListOf()
+
+    private val bleRepository: BleRepositoryImp by lazy {
+        BleRepositoryImp.getInstance()
+    }
 
 
     override fun onBind(intent: Intent?): IBinder {
@@ -37,12 +42,21 @@ class BleService : Service() {
     }
 
     inner class BleBinder : Binder() {
-        val service: BleService
-            get() = this@BleService
+
+        val startScan: (() -> Unit) = {
+            bleRepository.startScan()
+            scanLeDevice()
+        }
+
+        val stopScan: (() -> Unit) = {
+            bleRepository.stopScan()
+            stopLeScan()
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i("Ble Service", "started")
+        bleRepository.setReadyToScan()
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -60,33 +74,35 @@ class BleService : Service() {
             } else {
                 val curAddress: MacAddress = MacAddress(result.device.address)
                 val curDevice: Device = Device(curAddress, "")
-                if (!devices.contains(curDevice)) devices.add(curDevice)
+                if (!devices.contains(curDevice)) {
+                    devices.add(curDevice)
+                    bleRepository.updateDevices(devices)
+                }
             }
         }
     }
 
     fun scanLeDevice() {
-        if (!scanning) {
-            handler.postDelayed({
-                scanning = false
-                if (Build.VERSION.SDK_INT >= 31 &&
-                    ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.BLUETOOTH_SCAN
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    Toast.makeText(applicationContext, "New Android!", Toast.LENGTH_SHORT).show()
-                    // TODO: Consider calling ActivityCompat#requestPermissions
-                }
-                bluetoothLeScanner.stopScan(leScanCallback)
-                Log.i(LOG_TAG, "Devices: " + devices.joinToString(", ") { it.toString() })
-            }, SCAN_PERIOD)
-            scanning = true
-            bluetoothLeScanner.startScan(leScanCallback)
-        } else {
-            scanning = false
+        handler.postDelayed({
+            if (Build.VERSION.SDK_INT >= 31 &&
+                ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(applicationContext, "New Android!", Toast.LENGTH_SHORT).show()
+                // TODO: Consider calling ActivityCompat#requestPermissions
+            }
             bluetoothLeScanner.stopScan(leScanCallback)
-        }
+            Log.i(LOG_TAG, "Devices: " + devices.joinToString(", ") { it.toString() })
+            bleRepository.setScanningResult(devices)
+        }, SCAN_PERIOD)
+        bluetoothLeScanner.startScan(leScanCallback)
+    }
+
+    @SuppressLint("MissingPermission")
+    fun stopLeScan() {
+        bluetoothLeScanner.stopScan(leScanCallback)
     }
 }
 
