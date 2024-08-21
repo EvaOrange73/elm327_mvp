@@ -1,6 +1,7 @@
 package com.example.elm327.data_layer
 
 import com.example.elm327.data_layer.model.Device
+import com.example.elm327.data_layer.model.MacAddress
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,33 +26,29 @@ class BleRepositoryImp private constructor() : BleRepository {
         }
     }
 
-    fun setReadyToScan() {
+
+    fun updateScanState(scanState: ScanState){
         _uiState.update {
-            it.copy(scanState = ScanState.READY_TO_SCAN)
+            it.copy(scanState = scanState)
         }
     }
 
-    fun startScan() {
-        _uiState.update {
-            it.copy(scanState = ScanState.SCANNING)
-        }
-    }
-
-    fun stopScan() {
-        _uiState.update {
-            it.copy(scanState = ScanState.READY_TO_SCAN)
-        }
-    }
-
-    fun updateDevices(deviceList: List<Device>) {
+    fun updateDeviceList(deviceList: List<Device>) {
         _uiState.update {
             it.copy(deviceList = deviceList)
         }
     }
 
-    fun setScanningResult(deviceList: List<Device>) {
+    fun updateSelectedMacAddress(macAddress: MacAddress){
         _uiState.update {
-            BleState(ScanState.READY_TO_SCAN, deviceList)
+            it.copy(selectedMacAddress = macAddress)
+        }
+    }
+
+
+    fun updateConnectionState(connectionState: ConnectionState){
+        _uiState.update {
+            it.copy(connectionState = connectionState)
         }
     }
 }

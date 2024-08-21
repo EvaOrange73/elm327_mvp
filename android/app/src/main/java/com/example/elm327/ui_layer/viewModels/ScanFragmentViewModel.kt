@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.elm327.data_layer.BleRepository
+import com.example.elm327.data_layer.ConnectionState
 import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.Device
+import com.example.elm327.data_layer.model.MacAddress
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,7 +16,9 @@ import kotlinx.coroutines.launch
 
 data class ScanFragmentViewState(
     val scanState: ScanState = ScanState.NO_PERMISSIONS,
-    val deviceList: List<Device> = listOf()
+    val deviceList: List<Device> = listOf(),
+    val selectedMacAddress: MacAddress = MacAddress.default,
+    val connectionState: ConnectionState = ConnectionState.NO_PERMISSIONS,
 )
 
 class ScanFragmentViewModel(private val bleRepository: BleRepository) : ViewModel() {
@@ -34,7 +38,10 @@ class ScanFragmentViewModel(private val bleRepository: BleRepository) : ViewMode
         viewModelScope.launch {
             bleRepository.uiState.collect { bleState ->
                 _uiState.update {
-                    ScanFragmentViewState(bleState.scanState, bleState.deviceList)
+                    ScanFragmentViewState(
+                        bleState.scanState, bleState.deviceList,
+                        bleState.selectedMacAddress, bleState.connectionState
+                    )
                 }
             }
         }

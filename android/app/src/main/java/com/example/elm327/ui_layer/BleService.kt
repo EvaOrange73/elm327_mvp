@@ -17,8 +17,11 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.example.elm327.data_layer.BleRepositoryImp
+import com.example.elm327.data_layer.ConnectionState
+import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.Device
 import com.example.elm327.data_layer.model.MacAddress
+import com.example.elm327.util.elm.ElmManager
 
 class BleService : Service() {
     private val LOG_TAG = "BleService"
@@ -30,11 +33,17 @@ class BleService : Service() {
     private val SCAN_PERIOD: Long = 3000
 
 
-    private val devices: MutableList<Device> = mutableListOf()
+    private val devices: MutableList<Device> = mutableListOf(Device(MacAddress.default, ""))
 
     private val bleRepository: BleRepositoryImp by lazy {
         BleRepositoryImp.getInstance()
     }
+
+    private val elmManager: ElmManager by lazy {
+        ElmManager(applicationContext)
+    }
+
+    private var selectedMacAddress = MacAddress.default
 
 
     override fun onBind(intent: Intent?): IBinder {
@@ -44,19 +53,35 @@ class BleService : Service() {
     inner class BleBinder : Binder() {
 
         val startScan: (() -> Unit) = {
-            bleRepository.startScan()
+            bleRepository.updateScanState(ScanState.SCANNING)
             scanLeDevice()
         }
 
         val stopScan: (() -> Unit) = {
-            bleRepository.stopScan()
+            bleRepository.updateScanState(ScanState.READY_TO_SCAN)
             stopLeScan()
+        }
+
+        val selectMacAddress: ((MacAddress) -> Unit) = { macAddress ->
+            bleRepository.updateSelectedMacAddress(macAddress)
+            selectedMacAddress = macAddress
+        }
+
+        val connect: (() -> Unit) = {
+            bleRepository.updateConnectionState(ConnectionState.CONNECTING)
+            val device = bluetoothAdapter.getRemoteDevice(selectedMacAddress.toString())
+            elmManager.connect(device).useAutoConnect(true).enqueue()
+        }
+
+        val disconnect: (() -> Unit) = {
+            // TODO
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i("Ble Service", "started")
-        bleRepository.setReadyToScan()
+        bleRepository.updateScanState(ScanState.READY_TO_SCAN)
+        bleRepository.updateConnectionState(ConnectionState.READY_TO_CONNECT)
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -76,7 +101,7 @@ class BleService : Service() {
                 val curDevice: Device = Device(curAddress, "")
                 if (!devices.contains(curDevice)) {
                     devices.add(curDevice)
-                    bleRepository.updateDevices(devices)
+                    bleRepository.updateDeviceList(devices)
                 }
             }
         }
@@ -95,7 +120,7 @@ class BleService : Service() {
             }
             bluetoothLeScanner.stopScan(leScanCallback)
             Log.i(LOG_TAG, "Devices: " + devices.joinToString(", ") { it.toString() })
-            bleRepository.setScanningResult(devices)
+            bleRepository.updateDeviceList(devices)
         }, SCAN_PERIOD)
         bluetoothLeScanner.startScan(leScanCallback)
     }

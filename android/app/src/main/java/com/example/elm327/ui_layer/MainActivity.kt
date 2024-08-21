@@ -43,13 +43,8 @@ class MainActivity : AppCompatActivity() {
         ) as LocationManager
     }
 
-    var bound = false;
-    lateinit var bleStartScan: (() -> Unit)
-    lateinit var bleStopScan: (() -> Unit)
-
-    private val elmManager: ElmManager by lazy {
-        ElmManager(applicationContext)
-    }
+    var bound = false
+    lateinit var bleBinder : BleService.BleBinder
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("ShowToast", "MissingPermission")
@@ -90,9 +85,6 @@ class MainActivity : AppCompatActivity() {
             locationManager.isLocationEnabled,
             Settings.ACTION_LOCATION_SOURCE_SETTINGS
         )
-        val device = bluetoothAdapter.getRemoteDevice(MacAddress("синий").toString())
-        Log.i("OUR", device.uuids[0].uuid.toString())
-        elmManager.connect(device).useAutoConnect(true).enqueue()
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -102,9 +94,7 @@ class MainActivity : AppCompatActivity() {
             startService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-                    binder as BleService.BleBinder
-                    bleStartScan = binder.startScan
-                    bleStopScan = binder.stopScan
+                    bleBinder = binder as BleService.BleBinder
                     bound = true
                 }
 
@@ -133,24 +123,6 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-
-    fun startScan() {
-        Log.i(LOG_TAG, "start scan")
-        if (bound) {
-            bleStartScan()
-        }
-    }
-
-    fun stopScan() {
-        if (bound) {
-            bleStopScan()
-        }
-    }
-
-    fun readPid(){
-        elmManager.readPid(ObdPids.PID_0C)
     }
 }
 

@@ -11,21 +11,18 @@
     <string name="menu_car_info">Car info</string>
     <string name="menu_history">History</string>
 
-
-<!--    <string-array name="stages">-->
-<!--        <item>Enable bluetooth</item>-->
-<!--        <item>Scan for elm327</item>-->
-<!--        <item>Connect to elm327</item>-->
-<!--        <item>Read supported PIDs</item>-->
-<!--        <item>Send to server</item>-->
-<!--    </string-array>-->
+    <string name="no_scan_permissions">no scan permissions</string>
     <string name="start">start scan</string>
     <string name="scanning">scanning…</string>
     <string name="select_mac_address">Select mac address:</string>
+    <string name="no_connect_permissions">no connect permissions</string>
     <string name="connect">connect</string>
+    <string name="connecting">connecting…</string>
+    <string name="success">Successfully connect</string>
+    <string name="fail">Failed to connect</string>
+    <string name="try_again">Try again</string>
     <string name="disconnect">disconnect</string>
     <string name="car_id">Car id</string>
-    <!--    <string name="restart">Restart</string>-->
 
 
     <string-array name="filter">
