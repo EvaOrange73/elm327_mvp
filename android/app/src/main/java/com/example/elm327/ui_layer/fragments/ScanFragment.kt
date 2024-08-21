@@ -81,6 +81,7 @@ class ScanFragment : Fragment() {
 
     private fun connectButtonOnClick() {
         Log.i(LOG_TAG, "connect button clicked")
+        (activity as MainActivity).readPid()
     }
 
 

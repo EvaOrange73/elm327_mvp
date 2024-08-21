@@ -2,7 +2,6 @@ package com.example.elm327.ui_layer
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -13,7 +12,6 @@ import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -25,7 +23,6 @@ import com.example.elm327.R
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
-import com.example.elm327.ui_layer.viewModels.BleViewModel
 import com.example.elm327.util.elm.ElmManager
 import com.example.elm327.util.elm.ObdPids
 import com.google.android.material.navigation.NavigationView
@@ -47,14 +44,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     var bound = false;
-    var bleService: BleService? = null
-    private val elmManager: ElmManager by lazy { ElmManager(applicationContext) }
+    lateinit var bleStartScan: (() -> Unit)
+    lateinit var bleStopScan: (() -> Unit)
 
-
-    private val bleViewModel: BleViewModel by viewModels()
+    private val elmManager: ElmManager by lazy {
+        ElmManager(applicationContext)
+    }
 
     @RequiresApi(Build.VERSION_CODES.P)
-    @SuppressLint("ShowToast")
+    @SuppressLint("ShowToast", "MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -88,9 +86,13 @@ class MainActivity : AppCompatActivity() {
 
 
         enableSystemService(bluetoothAdapter.isEnabled, BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        enableSystemService(locationManager.isLocationEnabled, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-        elmManager.connect(bluetoothAdapter.getRemoteDevice(MacAddress("синий").toString()))
-        elmManager.readPid(ObdPids.PID_00)
+        enableSystemService(
+            locationManager.isLocationEnabled,
+            Settings.ACTION_LOCATION_SOURCE_SETTINGS
+        )
+        val device = bluetoothAdapter.getRemoteDevice(MacAddress("синий").toString())
+        Log.i("OUR", device.uuids[0].uuid.toString())
+        elmManager.connect(device).useAutoConnect(true).enqueue()
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -100,8 +102,9 @@ class MainActivity : AppCompatActivity() {
             startService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-                    Log.d(LOG_TAG, "MainActivity onServiceConnected")
-                    bleService = (binder as BleService.BleBinder).service
+                    binder as BleService.BleBinder
+                    bleStartScan = binder.startScan
+                    bleStopScan = binder.stopScan
                     bound = true
                 }
 
@@ -123,7 +126,11 @@ class MainActivity : AppCompatActivity() {
         checkServices()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
@@ -132,9 +139,18 @@ class MainActivity : AppCompatActivity() {
     fun startScan() {
         Log.i(LOG_TAG, "start scan")
         if (bound) {
-            bleService!!.scanLeDevice()
-            bleViewModel.startScan()
+            bleStartScan()
         }
+    }
+
+    fun stopScan() {
+        if (bound) {
+            bleStopScan()
+        }
+    }
+
+    fun readPid(){
+        elmManager.readPid(ObdPids.PID_0C)
     }
 }
 
