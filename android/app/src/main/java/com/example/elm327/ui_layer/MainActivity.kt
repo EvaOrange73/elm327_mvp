@@ -2,6 +2,7 @@ package com.example.elm327.ui_layer
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -21,9 +22,12 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.elm327.R
+import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
 import com.example.elm327.ui_layer.viewModels.BleViewModel
+import com.example.elm327.util.elm.ElmManager
+import com.example.elm327.util.elm.ObdPids
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
@@ -44,6 +48,7 @@ class MainActivity : AppCompatActivity() {
 
     var bound = false;
     var bleService: BleService? = null
+    private val elmManager: ElmManager by lazy { ElmManager(applicationContext) }
 
 
     private val bleViewModel: BleViewModel by viewModels()
@@ -84,6 +89,8 @@ class MainActivity : AppCompatActivity() {
 
         enableSystemService(bluetoothAdapter.isEnabled, BluetoothAdapter.ACTION_REQUEST_ENABLE)
         enableSystemService(locationManager.isLocationEnabled, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+        elmManager.connect(bluetoothAdapter.getRemoteDevice(MacAddress("синий").toString()))
+        elmManager.readPid(ObdPids.PID_00)
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
