@@ -25,6 +25,7 @@ import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
 import com.example.elm327.util.elm.ElmManager
 import com.example.elm327.util.elm.ObdPids
+import com.example.elm327.util.test.BleServiceTest
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
@@ -44,7 +45,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     var bound = false
-    lateinit var bleBinder : BleService.BleBinder
+//    lateinit var bleBinder : BleService.BleBinder
+    lateinit var bleBinder : BleServiceTest.BleBinderTest
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("ShowToast", "MissingPermission")
@@ -90,11 +92,13 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.P)
     private fun checkServices() {
         if (!bound && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
-            val bleServiceIntent = Intent(this, BleService::class.java)
+//            val bleServiceIntent = Intent(this, BleService::class.java)
+            val bleServiceIntent = Intent(this, BleServiceTest::class.java)
             startService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-                    bleBinder = binder as BleService.BleBinder
+//                    bleBinder = binder as BleService.BleBinder
+                    bleBinder = binder as BleServiceTest.BleBinderTest
                     bound = true
                 }
 
