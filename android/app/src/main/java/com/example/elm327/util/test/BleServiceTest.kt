@@ -11,6 +11,7 @@ import com.example.elm327.data_layer.ConnectionState
 import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.Device
 import com.example.elm327.data_layer.model.MacAddress
+import com.example.elm327.util.elm.ObdPids
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -19,6 +20,7 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class BleServiceTest : Service() {
+    private val LOG_TAG = "Ble Service Test"
 
     private val bleRepository: BleRepositoryImp by lazy {
         BleRepositoryImp.getInstance()
@@ -31,12 +33,14 @@ class BleServiceTest : Service() {
         Device(MacAddress("mac address 4"), ""),
     )
 
+    private var fakeConnection = false
+
     override fun onBind(intent: Intent?): IBinder {
         return BleBinderTest()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i("Ble Service Test", "started")
+        Log.i(LOG_TAG, "started")
         bleRepository.updateScanState(ScanState.READY_TO_SCAN)
         bleRepository.updateConnectionState(ConnectionState.READY_TO_CONNECT)
         return super.onStartCommand(intent, flags, startId)
@@ -47,7 +51,7 @@ class BleServiceTest : Service() {
         @OptIn(DelicateCoroutinesApi::class)
         val startScan: (() -> Unit) = {
             bleRepository.updateScanState(ScanState.SCANNING)
-            GlobalScope.async {fakeScan()}
+            GlobalScope.async { fakeScan() }
         }
 
         val stopScan: (() -> Unit) = {
@@ -59,18 +63,20 @@ class BleServiceTest : Service() {
             bleRepository.updateSelectedMacAddress(macAddress)
         }
 
+        @OptIn(DelicateCoroutinesApi::class)
         val connect: (() -> Unit) = {
             bleRepository.updateConnectionState(ConnectionState.CONNECTING)
-            generateFakePidValues()
+            fakeConnection = true
+            GlobalScope.async { generateFakePidValues() }
         }
 
         val disconnect: (() -> Unit) = {
-            // TODO
+            fakeConnection = false
         }
     }
 
 
-    suspend fun fakeScan()  {
+    suspend fun fakeScan() {
         val devices: MutableList<Device> = mutableListOf()
         fakeDeviceList.forEach {
             delay(1000)
@@ -80,12 +86,22 @@ class BleServiceTest : Service() {
         bleRepository.updateScanState(ScanState.READY_TO_SCAN)
     }
 
-    fun generateFakePidValues() {
+    suspend fun generateFakePidValues() {
         val file = File("recorded_pid_values.txt")
-        file.readLines().forEach {
-            Handler().postDelayed({
-                //TODO
-            }, 300)
+        while (fakeConnection) {
+            var lastTime = file.readText().split(" ")[0].toLong()
+            file.readLines().forEach {
+                if (fakeConnection) {
+                    val time = it.split(" ")[0].toLong()
+                    delay((time - lastTime) / 1_000_000)
+                    lastTime = time
+
+                    val data = it.split(" ")[2]
+                    val (pid, value) = ObdPids.parse(data)
+                    bleRepository.updatePidValue(pid, value)
+                    Log.i(LOG_TAG, "pid ${pid.pid} updated with value $value")
+                }
+            }
         }
     }
 

@@ -2,6 +2,8 @@ package com.example.elm327.data_layer
 
 import com.example.elm327.data_layer.model.Device
 import com.example.elm327.data_layer.model.MacAddress
+import com.example.elm327.util.elm.DecodedValue
+import com.example.elm327.util.elm.ObdPids
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +29,7 @@ class BleRepositoryImp private constructor() : BleRepository {
     }
 
 
-    fun updateScanState(scanState: ScanState){
+    fun updateScanState(scanState: ScanState) {
         _uiState.update {
             it.copy(scanState = scanState)
         }
@@ -39,16 +41,22 @@ class BleRepositoryImp private constructor() : BleRepository {
         }
     }
 
-    fun updateSelectedMacAddress(macAddress: MacAddress){
+    fun updateSelectedMacAddress(macAddress: MacAddress) {
         _uiState.update {
             it.copy(selectedMacAddress = macAddress)
         }
     }
 
 
-    fun updateConnectionState(connectionState: ConnectionState){
+    fun updateConnectionState(connectionState: ConnectionState) {
         _uiState.update {
             it.copy(connectionState = connectionState)
+        }
+    }
+
+    fun updatePidValue(pid: ObdPids, value: DecodedValue) {
+        _uiState.update {
+            it.also { it.pidValues[pid] = value }
         }
     }
 }
