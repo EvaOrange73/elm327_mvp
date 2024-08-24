@@ -2,7 +2,6 @@ package com.example.elm327.ui_layer
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -13,7 +12,6 @@ import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -25,9 +23,9 @@ import com.example.elm327.R
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
-import com.example.elm327.ui_layer.viewModels.BleViewModel
 import com.example.elm327.util.elm.ElmManager
 import com.example.elm327.util.elm.ObdPids
+import com.example.elm327.util.test.BleServiceTest
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
@@ -46,15 +44,12 @@ class MainActivity : AppCompatActivity() {
         ) as LocationManager
     }
 
-    var bound = false;
-    var bleService: BleService? = null
-    private val elmManager: ElmManager by lazy { ElmManager(applicationContext) }
-
-
-    private val bleViewModel: BleViewModel by viewModels()
+    var bound = false
+//    lateinit var bleBinder : BleService.BleBinder
+    lateinit var bleBinder : BleServiceTest.BleBinderTest
 
     @RequiresApi(Build.VERSION_CODES.P)
-    @SuppressLint("ShowToast")
+    @SuppressLint("ShowToast", "MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -88,20 +83,22 @@ class MainActivity : AppCompatActivity() {
 
 
         enableSystemService(bluetoothAdapter.isEnabled, BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        enableSystemService(locationManager.isLocationEnabled, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-        elmManager.connect(bluetoothAdapter.getRemoteDevice(MacAddress("синий").toString()))
-        elmManager.readPid(ObdPids.PID_00)
+        enableSystemService(
+            locationManager.isLocationEnabled,
+            Settings.ACTION_LOCATION_SOURCE_SETTINGS
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
     private fun checkServices() {
         if (!bound && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
-            val bleServiceIntent = Intent(this, BleService::class.java)
+//            val bleServiceIntent = Intent(this, BleService::class.java)
+            val bleServiceIntent = Intent(this, BleServiceTest::class.java)
             startService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-                    Log.d(LOG_TAG, "MainActivity onServiceConnected")
-                    bleService = (binder as BleService.BleBinder).service
+//                    bleBinder = binder as BleService.BleBinder
+                    bleBinder = binder as BleServiceTest.BleBinderTest
                     bound = true
                 }
 
@@ -123,18 +120,13 @@ class MainActivity : AppCompatActivity() {
         checkServices()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-
-    fun startScan() {
-        Log.i(LOG_TAG, "start scan")
-        if (bound) {
-            bleService!!.scanLeDevice()
-            bleViewModel.startScan()
-        }
     }
 }
 

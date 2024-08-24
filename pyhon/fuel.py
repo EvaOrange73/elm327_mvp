@@ -2,11 +2,10 @@ import time
 import warnings
 from bleak import *
 import commands
-import matplotlib
 
 warnings.filterwarnings('ignore')
-# ADDRESS = "00:10:CC:4F:36:03"  # синий
-ADDRESS = ""  # красный
+ADDRESS = "00:10:CC:4F:36:03"  # синий
+#ADDRESS = ""  # красный
 READ_UUID = "FFF1"
 WRITE_UUID = "FFF2"
 
@@ -63,26 +62,19 @@ async def main():
         cur_maf = cur_map = cur_rpm = cur_iat = 0
         liters_spent_1 = liters_spent_2 = 0
         while True:
-            await send('0110\r')  # MAF
-            await send('010B\r')  # MAP
-            await send('010C\r')  # RPM
-            await send('010F\r')  # IAT
-			if cur_iat != 0:
-		        cur_time = time.time_ns()
-		        await asyncio.sleep(1)
-		        delta_time = cur_time - prev_time
-		        liters_spent_1 += delta_time * cur_maf / 12556000000
-				x.append(cur_time)
-				y.append(delta_time * cur_maf / 12556000000)
-		        cur_maf = (cur_rpm * cur_map + 2 * 28.97) / (12000 * 8.314 * cur_iat)
-		        liters_spent_2 += delta_time * cur_maf / 12556000000
-		        print(round(liters_spent_1, 5), round(liters_spent_2, 5))
-				matplotlib.pyplot.plot(x, y)
-				matplotlib.pyplot.show()
-		        prev_time = cur_time
+            cur_time = time.time_ns()
+            await send('0110\r', sleep=0.1)  # MAF
+            await send('010B\r', sleep=0.1)  # MAP
+            await send('010C\r', sleep=0.1)  # RPM
+            await send('010F\r', sleep=0.1)  # IAT
+            delta_time = cur_time - prev_time
+            liters_spent_1 += delta_time * cur_maf / 12556000000
+            if cur_iat != 0:
+                cur_maf = (cur_rpm * cur_map + 2 * 28.97) / (12000 * 8.314 * cur_iat)
+                liters_spent_2 += delta_time * cur_maf / 12556000000
+                print(liters_spent_2)
+            prev_time = cur_time
 
 
 if __name__ == "__main__":
-	x = []
-	y = []
     asyncio.run(main())

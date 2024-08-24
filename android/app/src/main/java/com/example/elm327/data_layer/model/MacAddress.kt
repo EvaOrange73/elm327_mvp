@@ -33,4 +33,8 @@ class MacAddress(source: String) {
         return validatedMacAddress
     }
 
+    companion object {
+        val default = MacAddress("синий") //TODO: сохранять в файл последний выбранный мак адрес как дефолтный
+    }
+
 }

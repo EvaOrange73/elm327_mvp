@@ -33,8 +33,13 @@
             </intent-filter>
         </activity>
 
+<!--        <service-->
+<!--            android:name=".ui_layer.BleService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false" />-->
+
         <service
-            android:name=".ui_layer.BleService"
+            android:name=".util.test.BleServiceTest"
             android:enabled="true"
             android:exported="false" />
     </application>

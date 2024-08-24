@@ -54,5 +54,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     //for lifecycle viewmodel providers and livedata
-    implementation("androidx.lifecycle:lifecycle-extensions:2.1.0-alpha02")
+    implementation(libs.androidx.lifecycle.extensions)
+
+    implementation(libs.kotlinx.coroutines.android)
+
 }

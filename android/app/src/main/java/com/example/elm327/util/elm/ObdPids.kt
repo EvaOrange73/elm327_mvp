@@ -1,5 +1,7 @@
 package com.example.elm327.util.elm
 
+import android.util.Log
+
 
 enum class FuelType(val num: ULong, val descrtiption: String) {
     NOT_AVAILABLE(0u, "Not available"),
@@ -216,13 +218,14 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
 
         fun parse(rawData: String): Pair<ObdPids, DecodedValue> {
             val data = rawData.replace("\\s".toRegex(), "")
-            if (data.length == 19) {
+            if (data.length > 10) {
                 val ecu = data.slice(0..2)
                 val answerLength = data.slice(3..4)
                 val errorCode = data.slice(5..5)
                 val mode = data.slice(6..6)
                 val pidString = data.slice(7..8)
                 val pidValue = data.slice(9..<data.length)
+                Log.i("OUR", ecu + ';' + answerLength + ';' + errorCode + ';' + mode + ';' + pidString + ';' + pidValue)
                 if (ecu == "7E8" && errorCode == "4" && mode == "1") {
                     val pid = ObdPids[pidString]
                     return Pair(pid, pid.decoder.decode(pidValue))
@@ -293,16 +296,16 @@ enum class Decoders(val decode: (String) -> DecodedValue) {
     class Parser(private var rawData: String) {
         val A = rawData.slice(0..1).toUInt(radix = 16).toDouble()
         val B = rawData.slice(2..3).toUInt(radix = 16).toDouble()
-        val C = rawData.slice(4..5).toUInt(radix = 16).toDouble()
-        val D = rawData.slice(6..7).toUInt(radix = 16).toDouble()
+        val C = 1.0//rawData.slice(4..5).toUInt(radix = 16).toDouble()
+        val D = 1.0//rawData.slice(6..7).toUInt(radix = 16).toDouble()
 
         val AB = rawData.slice(0..3).toUInt(radix = 16).toDouble()
-        val CD = rawData.slice(4..7).toUInt(radix = 16).toDouble()
+        val CD = 1.0//rawData.slice(4..7).toUInt(radix = 16).toDouble()
 
-        val AB_SIGNED = rawData.slice(0..3).toInt(radix = 16).toDouble()
+        val AB_SIGNED = 1.0//rawData.slice(0..3).toInt(radix = 16).toDouble()
 
-        val num = rawData.slice(0..7).toULong(16)
-        val bits = List(32) { i -> ((num shr i) and 1u).toUInt() }.reversed()
+        val num = 1//rawData.slice(0..7).toULong(16)
+        val bits = listOf<UInt>()//List(32) { i -> ((num shr i) and 1u).toUInt() }.reversed()
     }
 }
 

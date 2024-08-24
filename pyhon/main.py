@@ -3,8 +3,8 @@ from bleak import *
 import commands
 
 warnings.filterwarnings('ignore')
-# ADDRESS = "00:10:CC:4F:36:03"  # синий
-ADDRESS = "22:C0:00:03:61:2E"  # красный
+ADDRESS = "00:10:CC:4F:36:03"  # синий
+#ADDRESS = "22:C0:00:03:61:2E"  # красный
 READ_UUID = "FFF1"
 WRITE_UUID = "FFF2"
 
