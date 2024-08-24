@@ -1,6 +1,7 @@
 package com.example.elm327.ui_layer.fragments
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
@@ -24,7 +26,7 @@ import com.example.elm327.ui_layer.MainActivity
 import com.example.elm327.ui_layer.viewModels.ScanFragmentViewModel
 import kotlinx.coroutines.launch
 
-
+@RequiresApi(Build.VERSION_CODES.P)
 class ScanFragment : Fragment() {
     val LOG_TAG = "Scan fragment"
 
@@ -101,10 +103,13 @@ class ScanFragment : Fragment() {
     }
 
     private fun scanButtonOnClick() {
-        when (viewModel.uiState.value.scanState) {
-            ScanState.NO_PERMISSIONS -> TODO()
-            ScanState.READY_TO_SCAN -> (activity as MainActivity).bleBinder.startScan()
-            ScanState.SCANNING -> (activity as MainActivity).bleBinder.stopScan()
+        val binder = (activity as MainActivity).bleBinder
+        if (binder != null) {
+            when (viewModel.uiState.value.scanState) {
+                ScanState.NO_PERMISSIONS -> TODO()
+                ScanState.READY_TO_SCAN -> binder.startScan()
+                ScanState.SCANNING -> binder.stopScan()
+            }
         }
     }
 
@@ -132,7 +137,8 @@ class ScanFragment : Fragment() {
                 id: Long
             ) {
                 val item = parent.getItemAtPosition(position) as String
-                (activity as MainActivity).bleBinder.selectMacAddress(MacAddress(item))
+                val binder = (activity as MainActivity).bleBinder
+                binder?.selectMacAddress(MacAddress(item))
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -176,6 +182,7 @@ class ScanFragment : Fragment() {
     }
 
     private fun connectButtonOnClick() {
-        (activity as MainActivity).bleBinder.connect()
+        val binder = (activity as MainActivity).bleBinder
+        if (binder != null) binder.connect()
     }
 }

@@ -1,5 +1,6 @@
 package com.example.elm327.ui_layer
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.ComponentName
@@ -20,16 +21,13 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.elm327.R
-import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
-import com.example.elm327.util.elm.ElmManager
-import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.test.BleServiceTest
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
-
+@RequiresApi(Build.VERSION_CODES.P)
 class MainActivity : AppCompatActivity() {
     private val LOG_TAG = "MainActivity"
 
@@ -45,8 +43,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     var bound = false
-//    lateinit var bleBinder : BleService.BleBinder
-    lateinit var bleBinder : BleServiceTest.BleBinderTest
+
+    //    lateinit var bleBinder : BleService.BleBinder
+    var bleBinder: BleServiceTest.BleBinderTest? = null
+        get() = field.also { bindBleService() }
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("ShowToast", "MissingPermission")
@@ -81,7 +81,10 @@ class MainActivity : AppCompatActivity() {
 //            Manifest.permission.ACCESS_BACKGROUND_LOCATION
 //        )
 
+        checkSystemServicesEnabled()
+    }
 
+    private fun checkSystemServicesEnabled() {
         enableSystemService(bluetoothAdapter.isEnabled, BluetoothAdapter.ACTION_REQUEST_ENABLE)
         enableSystemService(
             locationManager.isLocationEnabled,
@@ -89,8 +92,14 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
-    private fun checkServices() {
+    private fun enableSystemService(isEnabled: Boolean, actionRequest: String) {
+        if (!isEnabled) {
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { bindBleService() }
+                .launch(Intent(actionRequest))
+        }
+    }
+
+    private fun bindBleService() {
         if (!bound && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
 //            val bleServiceIntent = Intent(this, BleService::class.java)
             val bleServiceIntent = Intent(this, BleServiceTest::class.java)
@@ -109,15 +118,6 @@ class MainActivity : AppCompatActivity() {
             }
             bindService(bleServiceIntent, serviceConnection, 0)
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.P)
-    private fun enableSystemService(isEnabled: Boolean, actionRequest: String) {
-        if (!isEnabled) {
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { checkServices() }
-                .launch(Intent(actionRequest))
-        }
-        checkServices()
     }
 
     override fun onRequestPermissionsResult(

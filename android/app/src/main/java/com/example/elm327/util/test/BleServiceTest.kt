@@ -58,7 +58,7 @@ class BleServiceTest : Service() {
             //TODO
         }
 
-        val selectMacAddress: ((MacAddress) -> Unit) = { macAddress ->
+        fun selectMacAddress(macAddress: MacAddress){
             bleRepository.updateSelectedMacAddress(macAddress)
         }
 
