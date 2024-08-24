@@ -20,6 +20,7 @@ import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
 import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.Device
+import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.util.elm.ElmManager
 
@@ -32,9 +33,6 @@ class BleService : Service() {
 
     private val SCAN_PERIOD: Long = 3000
 
-
-    private val devices: MutableList<Device> = mutableListOf(Device(MacAddress.default, ""))
-
     private val bleRepository: BleRepositoryImp by lazy {
         BleRepositoryImp.getInstance()
     }
@@ -43,7 +41,8 @@ class BleService : Service() {
         ElmManager(applicationContext)
     }
 
-    private var selectedMacAddress = MacAddress.default
+    private val devices: DeviceList = DeviceList()
+    private var selectedMacAddress = MacAddress.getDefault()
 
 
     override fun onBind(intent: Intent?): IBinder {
@@ -98,9 +97,8 @@ class BleService : Service() {
                 // TODO: Consider calling ActivityCompat#requestPermissions
             } else {
                 val curAddress: MacAddress = MacAddress(result.device.address)
-                val curDevice: Device = Device(curAddress, "")
-                if (!devices.contains(curDevice)) {
-                    devices.add(curDevice)
+                if (devices.findDeviceByMacAddress(curAddress) == null) {
+                    devices.add(Device(curAddress)) //TODO сохранять имя
                     bleRepository.updateDeviceList(devices)
                 }
             }
@@ -119,7 +117,7 @@ class BleService : Service() {
                 // TODO: Consider calling ActivityCompat#requestPermissions
             }
             bluetoothLeScanner.stopScan(leScanCallback)
-            Log.i(LOG_TAG, "Devices: " + devices.joinToString(", ") { it.toString() })
+            Log.i(LOG_TAG, "Devices: $devices")
             bleRepository.updateDeviceList(devices)
         }, SCAN_PERIOD)
         bluetoothLeScanner.startScan(leScanCallback)

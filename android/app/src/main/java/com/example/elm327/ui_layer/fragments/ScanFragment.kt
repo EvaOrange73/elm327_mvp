@@ -17,7 +17,7 @@ import com.example.elm327.R
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
 import com.example.elm327.data_layer.ScanState
-import com.example.elm327.data_layer.model.Device
+import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.databinding.FragmentScanBinding
 import com.example.elm327.ui_layer.MainActivity
@@ -29,8 +29,6 @@ class ScanFragment : Fragment() {
     val LOG_TAG = "Scan fragment"
 
     private var _binding: FragmentScanBinding? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private val bleRepository: BleRepositoryImp by lazy {
@@ -48,7 +46,10 @@ class ScanFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect {
                     updateScanButton(viewModel.uiState.value.scanState)
-                    updateSpinner(viewModel.uiState.value.deviceList, viewModel.uiState.value.selectedMacAddress)
+                    updateSpinner(
+                        viewModel.uiState.value.deviceList,
+                        viewModel.uiState.value.selectedMacAddress
+                    )
                     updateConnectionButton(viewModel.uiState.value.connectionState)
                 }
             }
@@ -76,29 +77,8 @@ class ScanFragment : Fragment() {
         _binding = null
     }
 
-    private fun scanButtonOnClick() {
-        when (viewModel.uiState.value.scanState) {
-            ScanState.NO_PERMISSIONS -> TODO()
-            ScanState.READY_TO_SCAN -> (activity as MainActivity).bleBinder.startScan()
-            ScanState.SCANNING -> (activity as MainActivity).bleBinder.stopScan()
-        }
-    }
 
-    private var itemSelectedListener: AdapterView.OnItemSelectedListener =
-        object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected( parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val item = parent.getItemAtPosition(position) as String
-                (activity as MainActivity).bleBinder.selectMacAddress(MacAddress(item))
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-        }
-
-
-    private fun connectButtonOnClick() {
-        (activity as MainActivity).bleBinder.connect()
-    }
-
+    //Scan button
 
     private fun updateScanButton(scanButtonState: ScanState) {
         val scanButton = binding.button1
@@ -120,18 +100,47 @@ class ScanFragment : Fragment() {
         }
     }
 
-    private fun updateSpinner(spinnerList: List<Device>, selectedMacAddress: MacAddress) {
+    private fun scanButtonOnClick() {
+        when (viewModel.uiState.value.scanState) {
+            ScanState.NO_PERMISSIONS -> TODO()
+            ScanState.READY_TO_SCAN -> (activity as MainActivity).bleBinder.startScan()
+            ScanState.SCANNING -> (activity as MainActivity).bleBinder.stopScan()
+        }
+    }
+
+
+    // Spinner
+
+    private fun updateSpinner(spinnerList: DeviceList, selectedMacAddress: MacAddress) {
         val spinner = binding.spinner
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
             requireActivity().applicationContext,
             android.R.layout.simple_spinner_item,
-            spinnerList.map { it.address.toString() })
+            spinnerList.getStringList()
+        )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
-        binding.spinner.setSelection(spinnerList.indexOf(spinnerList.find{
-            it.address == selectedMacAddress
-        }))
+        binding.spinner.setSelection(spinnerList.indexOf(selectedMacAddress))
     }
+
+    private var itemSelectedListener: AdapterView.OnItemSelectedListener =
+        object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View,
+                position: Int,
+                id: Long
+            ) {
+                val item = parent.getItemAtPosition(position) as String
+                (activity as MainActivity).bleBinder.selectMacAddress(MacAddress(item))
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+        }
+
+
+    // Connect Button
 
     private fun updateConnectionButton(connectionState: ConnectionState) {
         val connectionButton = binding.button2
@@ -164,5 +173,9 @@ class ScanFragment : Fragment() {
                 connectionButton.text = getString(R.string.try_again)
             }
         }
+    }
+
+    private fun connectButtonOnClick() {
+        (activity as MainActivity).bleBinder.connect()
     }
 }

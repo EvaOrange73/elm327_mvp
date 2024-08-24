@@ -1,6 +1,6 @@
 package com.example.elm327.data_layer
 
-import com.example.elm327.data_layer.model.Device
+import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.util.elm.DecodedValue
 import com.example.elm327.util.elm.ObdPids
@@ -35,7 +35,7 @@ class BleRepositoryImp private constructor() : BleRepository {
         }
     }
 
-    fun updateDeviceList(deviceList: List<Device>) {
+    fun updateDeviceList(deviceList: DeviceList) {
         _uiState.update {
             it.copy(deviceList = deviceList)
         }

@@ -3,20 +3,19 @@ package com.example.elm327.util.test
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
 import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.Device
+import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.util.elm.ObdPids
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class BleServiceTest : Service() {
@@ -77,7 +76,7 @@ class BleServiceTest : Service() {
 
 
     suspend fun fakeScan() {
-        val devices: MutableList<Device> = mutableListOf()
+        val devices = DeviceList()
         fakeDeviceList.forEach {
             delay(1000)
             devices.add(it)
