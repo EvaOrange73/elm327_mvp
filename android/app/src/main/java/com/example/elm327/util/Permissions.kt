@@ -1,18 +1,28 @@
 package com.example.elm327.util
 
+import android.Manifest
 import android.content.DialogInterface
 import android.content.pm.PackageManager
-import android.widget.Toast
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.elm327.ui_layer.MainActivity
 
 class Permissions(private val mainActivity: MainActivity) {
+    private val LOG_TAG = "Permissions"
+
     private var curPermission: String? = null
     private val REQUEST_PERMISSION_BLE: Int = 1
 
-    fun showPermissionsState(vararg permissionsToCheck: String) {
+    fun showPermissionsState(
+        permissionsToCheck: List<String> = listOf(
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+    )) {
         for (permission in permissionsToCheck) {
             curPermission = permission
             showCurPermissionState()
@@ -23,18 +33,18 @@ class Permissions(private val mainActivity: MainActivity) {
         when (requestCode) {
             REQUEST_PERMISSION_BLE -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (curPermission == null) {
-                    Toast.makeText(this.mainActivity, "Permission ??? Granted!", Toast.LENGTH_SHORT).show()
+                    Log.i(LOG_TAG, "Permission ??? Granted!")
                 }
                 else {
-                    Toast.makeText(this.mainActivity, "Permission ${curPermission!!.split('.').last()} Granted!", Toast.LENGTH_SHORT).show()
+                    Log.i(LOG_TAG, "Permission ${curPermission!!.split('.').last()} Granted!")
                 }
             }
             else {
                 if (curPermission == null) {
-                    Toast.makeText(this.mainActivity, "Permission ??? Denied!", Toast.LENGTH_SHORT).show()
+                    Log.i(LOG_TAG, "Permission ??? Denied!")
                 }
                 else {
-                    Toast.makeText(this.mainActivity, "Permission ${curPermission!!.split('.').last()} Denied!", Toast.LENGTH_SHORT).show()
+                    Log.i(LOG_TAG, "Permission ${curPermission!!.split('.').last()} Denied!")
                 }
             }
         }
@@ -52,7 +62,7 @@ class Permissions(private val mainActivity: MainActivity) {
             }
         }
         else {
-            Toast.makeText(this.mainActivity, "Permission ${curPermission!!.split('.').last()} already Granted!", Toast.LENGTH_SHORT).show()
+            Log.i(LOG_TAG, "Permission ${curPermission!!.split('.').last()} already Granted!")
         }
     }
 
