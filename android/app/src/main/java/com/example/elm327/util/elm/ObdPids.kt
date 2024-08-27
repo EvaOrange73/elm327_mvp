@@ -132,19 +132,19 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
     }
 }
 
-fun getA(input : String) : Double { return input.slice(0..1).toUInt(radix = 16).toDouble() }
-fun getB(input : String) : Double { return input.slice(2..3).toUInt(radix = 16).toDouble() }
-fun getC(input : String) : Double { return input.slice(4..5).toUInt(radix = 16).toDouble() }
-fun getD(input : String) : Double { return input.slice(6..7).toUInt(radix = 16).toDouble() }
+fun getA(input: String) : Double { return input.slice(0..1).toUInt(radix = 16).toDouble() }
+fun getB(input: String) : Double { return input.slice(2..3).toUInt(radix = 16).toDouble() }
+fun getC(input: String) : Double { return input.slice(4..5).toUInt(radix = 16).toDouble() }
+fun getD(input: String) : Double { return input.slice(6..7).toUInt(radix = 16).toDouble() }
 
-fun getAB(input : String) : Double { return input.slice(0..3).toUInt(radix = 16).toDouble() }
-fun getCD(input : String) : Double { return input.slice(4..7).toUInt(radix = 16).toDouble() }
+fun getAB(input: String) : Double { return input.slice(0..3).toUInt(radix = 16).toDouble() }
+fun getCD(input: String) : Double { return input.slice(4..7).toUInt(radix = 16).toDouble() }
 
-fun getSignedAB(input : String) : Double { return input.slice(0..3).toInt(radix = 16).toDouble() }
+fun getSignedAB(input: String) : Double { return input.slice(0..3).toInt(radix = 16).toDouble() }
+fun getSignedCD(input: String) : Double { return input.slice(4..7).toInt(radix = 16).toDouble() }
 
-fun getNum(input : String) : ULong { return input.slice(0..7).toULong(16) }
-fun getBitsFourBytes(input : String) : List<UInt> { return List(32) { i -> ((getNum(input) shr i) and 1u).toUInt() }.reversed() }
-fun getBitsFirstByte(input : String) : List<UInt> { return List(8) { i -> ((getNum(input) shr i) and 1u).toUInt() }.reversed() } // TODO
+fun getBitsFirstByte(input: String) : List<UInt> { return List(8) { i -> ((input.slice(0..1).toULong(radix = 16) shr i) and 1u).toUInt() }.reversed() }
+fun getBitsFourBytes(input: String) : List<UInt> { return List(32) { i -> ((input.slice(0..7).toULong(radix = 16) shr i) and 1u).toUInt() }.reversed() }
 
 enum class Decoders(val decode: (String) -> List<Value>) {
     DEFAULT({ input -> listOf(RawData(input)) }),
@@ -182,17 +182,17 @@ enum class Decoders(val decode: (String) -> List<Value>) {
 
     MAX_VALUES({ input -> listOf(Ratio(getA(input)), Voltage(getB(input)), ElectricCurrent.milliAmpere(getC(input)), Pressure.kiloPascal(getD(input) * 10)) }),
 
-    SENSORS_1_8({ input -> getBitsFirstByte(input).reversed().map { Bool(it != 0u) } }),
-    SENSORS_1_8_ALT({ input -> getBitsFirstByte(input).reversed().map { Bool(it != 0u) } }),
+    SENSORS_1_8({ input -> getBitsFirstByte(input).reversed().mapIndexed { index, it -> Bool(it != 0u, (index + 1).toString()) } }),
+    SENSORS_1_8_ALT({ input -> getBitsFirstByte(input).reversed().mapIndexed { index, it -> Bool(it != 0u, (index + 1).toString()) } }),
 
-    FUEL_TYPE({ input -> listOf(FuelType(FuelTypes[getA(input).toULong()])) }),
-    OBD_STANDARDS({ input -> listOf(OBDStandard(OBDStandards[getA(input).toULong()])) }),
-    FUEL_SYSTEM_STATUS({ input -> listOf(FuelSystemStatus(FuelSystemStatuses[getA(input).toULong()]), FuelSystemStatus(FuelSystemStatuses[getB(input).toULong()])) }),
-    AIR_STATUS({ input -> listOf(AirStatus(AirStatuses[getA(input).toULong()])) }),
+    FUEL_TYPE({ input -> listOf(FuelType.fromULong(getA(input).toULong())) }),
+    OBD_STANDARDS({ input -> listOf(OBDStandard.fromULong(getA(input).toULong())) }),
+    FUEL_SYSTEM_STATUS({ input -> listOf(FuelSystemStatus.fromULong(getA(input).toULong()), FuelSystemStatus.fromULong(getB(input).toULong())) }),
+    AIR_STATUS({ input -> listOf(AirStatus.fromULong(getA(input).toULong())) }),
 
-    PIDS_01_20({ input -> getBitsFourBytes(input).map { Bool(it != 0u) } }),
-    PIDS_21_40({ input -> getBitsFourBytes(input).map { Bool(it != 0u) } }),
-    PIDS_41_60({ input -> getBitsFourBytes(input).map { Bool(it != 0u) } }),
-    PIDS_61_80({ input -> getBitsFourBytes(input).map { Bool(it != 0u) } }),
+    PIDS_01_20({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool(it != 0u, Integer.toHexString(index + 1)) } }),
+    PIDS_21_40({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool(it != 0u, Integer.toHexString(index + 21)) } }),
+    PIDS_41_60({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool(it != 0u, Integer.toHexString(index + 41)) } }),
+    PIDS_61_80({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool(it != 0u, Integer.toHexString(index + 61)) } }),
     ;
 }

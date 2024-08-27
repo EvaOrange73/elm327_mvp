@@ -30,7 +30,7 @@ class RawData(private val data: String) : Value()
     }
 }
 
-class Bool(private val bool: Boolean, private val number: Int? = null) : Value()
+class Bool(private val bool: Boolean, private val number: String? = null) : Value()
 {
     override val value: Boolean = bool
 
