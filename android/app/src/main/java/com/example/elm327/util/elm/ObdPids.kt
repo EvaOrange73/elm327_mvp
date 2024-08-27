@@ -1,118 +1,11 @@
 package com.example.elm327.util.elm
 
 import android.util.Log
-
-
-enum class FuelType(val num: ULong, val descrtiption: String) {
-    NOT_AVAILABLE(0u, "Not available"),
-    GASOLINE(1u, "Gasoline"),
-    METHANOL(2u, "Methanol"),
-    ETHANOL(3u, "Ethanol"),
-    DIESEL(4u, "Diesel"),
-    LPG(5u, "LPG"),
-    CNG(6u, "CNG"),
-    PROPANE(7u, "Propane"),
-    ELECTRIC(8u, "Electric"),
-    BIFUEL_RUNNING_GASOLINE(9u, "Bifuel running Gasoline"),
-    BIFUEL_RUNNING_METHANOL(10u, "Bifuel running Methanol"),
-    BIFUEL_RUNNING_ETHANOL(11u, "Bifuel running Ethanol"),
-    BIFUEL_RUNNING_LPG(12u, "Bifuel running LPG"),
-    BIFUEL_RUNNING_CNG(13u, "Bifuel running CNG"),
-    BIFUEL_RUNNING_PROPANE(14u, "Bifuel running Propane"),
-    BIFUEL_RUNNING_ELECTRICITY(15u, "Bifuel running Electricity"),
-    BIFUEL_RUNNING_ELECTRIC_AND_COMBUSTION_ENGINE(16u, "Bifuel running electric and combustion engine"),
-    HYBRID_GASOLINE(17u, "Hybrid gasoline"),
-    HYBRID_ETHANOL(18u, "Hybrid Ethanol"),
-    HYBRID_DIESEL(19u, "Hybrid Diesel"),
-    HYBRID_ELECTRIC(20u, "Hybrid Electric"),
-    HYBRID_RUNNING_ELECTRIC_AND_COMBUSTION_ENGINE(21u, "Hybrid running electric and combustion engine"),
-    HYBRID_REGENERATIVE(22u, "Hybrid Regenerative"),
-    BIFUEL_RUNNING_DIESEL(23u, "Bifuel running diesel"),
-
-    FUEL_TYPE_UNKNOWN(24u, "Unknown Fuel Type"),
-    ;
-
-    companion object{
-        private val map: Map<ULong, FuelType> = FuelType.entries.associateBy(FuelType::num)
-        operator fun get(num: ULong) = map[num] ?: FUEL_TYPE_UNKNOWN
-    }
-}
-
-enum class OBDStandards(val num: ULong, val descrtiption: String) {
-    OBD_II_AS_DEFINED_BY_THE_CARB(1u, "OBD-II as defined by the CARB"),
-    OBD_AS_DEFINED_BY_THE_EPA(2u, "OBD as defined by the EPA"),
-    OBD_AND_OBD_II(3u, "OBD and OBD-II"),
-    OBD_I(4u, "OBD-I"),
-    NOT_OBD_COMPLIANT(5u, "Not OBD compliant"),
-    EOBD_EUROPE(6u, "EOBD (Europe)"),
-    EOBD_AND_OBD_II(7u, "EOBD and OBD-II"),
-    EOBD_AND_OBD(8u, "EOBD and OBD"),
-    EOBD_OBD_AND_OBD_II(9u, "EOBD, OBD and OBD II"),
-    JOBD_JAPAN(10u, "JOBD (Japan)"),
-    JOBD_AND_OBD_II(11u, "JOBD and OBD II"),
-    JOBD_AND_EOBD(12u, "JOBD and EOBD"),
-    JOBD_EOBD_AND_OBD_II(13u, "JOBD, EOBD, and OBD II"),
-    ENGINE_MANUFACTURER_DIAGNOSTICS_EMD(17u, "Engine Manufacturer Diagnostics (EMD)"),
-    ENGINE_MANUFACTURER_DIAGNOSTICS_ENHANCED_EMD(18u, "Engine Manufacturer Diagnostics Enhanced (EMD+)"),
-    HEAVY_DUTY_ON_BOARD_DIAGNOSTICS_CHILD_PARTIAL_HD_OBD_C(19u, "Heavy Duty On-Board Diagnostics (Child/Partial) (HD OBD-C)"),
-    HEAVY_DUTY_ON_BOARD_DIAGNOSTICS_HD_OBD(20u, "Heavy Duty On-Board Diagnostics (HD OBD)"),
-    WORLD_WIDE_HARMONIZED_OBD_WWH_OBD(21u, "World Wide Harmonized OBD (WWH OBD)"),
-    HEAVY_DUTY_EURO_OBD_STAGE_I_WITHOUT_NOX_CONTROL_HD_EOBD_I(23u, "Heavy Duty Euro OBD Stage I without NOx control (HD EOBD-I)"),
-    HEAVY_DUTY_EURO_OBD_STAGE_I_WITH_NOX_CONTROL_HD_EOBD_I_N(24u, "Heavy Duty Euro OBD Stage I with NOx control (HD EOBD-I N)"),
-    HEAVY_DUTY_EURO_OBD_STAGE_II_WITHOUT_NOX_CONTROL_HD_EOBD_II(25u, "Heavy Duty Euro OBD Stage II without NOx control (HD EOBD-II)"),
-    HEAVY_DUTY_EURO_OBD_STAGE_II_WITH_NOX_CONTROL_HD_EOBD_II_N(26u, "Heavy Duty Euro OBD Stage II with NOx control (HD EOBD-II N)"),
-    BRAZIL_OBD_PHASE_1_OBDBR_1(28u, "Brazil OBD Phase 1 (OBDBr-1)"),
-    BRAZIL_OBD_PHASE_2_OBDBR_2(29u, "Brazil OBD Phase 2 (OBDBr-2)"),
-    KOREAN_OBD_KOBD(30u, "Korean OBD (KOBD)"),
-    INDIA_OBD_I_IOBD_I(31u, "India OBD I (IOBD I)"),
-    INDIA_OBD_II_IOBD_II(32u, "India OBD II (IOBD II)"),
-    HEAVY_DUTY_EURO_OBD_STAGE_VI_HD_EOBD_IV(33u, "Heavy Duty Euro OBD Stage VI (HD EOBD-IV)"),
-
-    OBD_STANDARD_UNKNOWN(0u, "Unknown OBD Standard"),
-    ;
-
-    companion object{
-        private val map: Map<ULong, OBDStandards> = OBDStandards.entries.associateBy(OBDStandards::num)
-        operator fun get(num: ULong) = map[num] ?: OBD_STANDARD_UNKNOWN
-    }
-}
-
-enum class FuelSystemStatus(val num: ULong, val descrtiption: String) {
-    THE_MOTOR_IS_OFF(0u, "The motor is off"),
-    OPEN_LOOP_DUE_TO_INSUFFICIENT_ENGINE_TEMPERATURE(1u, "Open loop due to insufficient engine temperature"),
-    CLOSED_LOOP_USING_OXYGEN_SENSOR_FEEDBACK_TO_DETERMINE_FUEL_MIX(2u, "Closed loop, using oxygen sensor feedback to determine fuel mix"),
-    OPEN_LOOP_DUE_TO_ENGINE_LOAD_OR_FUEL_CUT_DUE_TO_DECELERATION(4u, "Open loop due to engine load OR fuel cut due to deceleration"),
-    OPEN_LOOP_DUE_TO_SYSTEM_FAILURE(8u, "Open loop due to system failure"),
-    CLOSED_LOOP_USING_AT_LEAST_ONE_OXYGEN_SENSOR_BUT_THERE_IS_A_FAULT_IN_THE_FEEDBACK_SYSTEM(16u, "Closed loop, using at least one oxygen sensor but there is a fault in the feedback system"),
-
-    SYSTEM_STATUS_UNKNOWN(3u, "Unknown Fuel System Status"),
-    ;
-
-    companion object{
-        private val map: Map<ULong, FuelSystemStatus> = FuelSystemStatus.entries.associateBy(FuelSystemStatus::num)
-        operator fun get(num: ULong) = map[num] ?: SYSTEM_STATUS_UNKNOWN
-    }
-}
-
-enum class AirStatus(val num: ULong, val descrtiption: String)  {
-    UPSTREAM(1u, "Upstream"),
-    DOWNSTREAM_OF_CATALYTIC_CONVERTER(2u, "Downstream of catalytic converter"),
-    FROM_THE_OUTSIDE_ATMOSPHERE_OR_OFF(4u, "From the outside atmosphere or off"),
-    PUMP_COMMANDED_ON_FOR_DIAGNOSTIC(8u, "Pump commanded on for diagnostic"),
-
-    AIR_STATUS_UNKNOWN(0u, "Unknown Air Status"),
-    ;
-
-    companion object{
-        private val map: Map<ULong, AirStatus> = AirStatus.entries.associateBy(AirStatus::num)
-        operator fun get(num: ULong) = map[num] ?: AIR_STATUS_UNKNOWN
-    }
-}
+import com.example.elm327.util.value.*
 
 enum class ObdPids(val pid: String, val descriptionShort: String, val descriptionLong: String, val decoder: Decoders) {
     NO_PID_FOUND("", "", "", Decoders.DEFAULT),
     PID_00("00", "", "Supported PIDs [01-20]", Decoders.PIDS_01_20),
-
     PID_01("01", "", "Status since DTCs cleared", Decoders.DEFAULT),  // TODO AS PID 41
     PID_02("02", "", "DTC that triggered the freeze frame", Decoders.DEFAULT),  // TODO AS SERVICE 03
     PID_03("03", "", "Fuel System Status", Decoders.FUEL_SYSTEM_STATUS),
@@ -214,11 +107,13 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
 
     companion object {
         private val map: Map<String, ObdPids> = entries.associateBy(ObdPids::pid)
-        operator fun get(pid: String) = map[pid] ?: NO_PID_FOUND
 
-        fun parse(rawData: String): Pair<ObdPids, DecodedValue> {
+        operator fun get(pid: String) = map[pid] ?: NO_PID_FOUND
+        fun parse(rawData: String): Pair<ObdPids, List<Value>>
+        {
             val data = rawData.replace("\\s".toRegex(), "")
-            if (data.length > 10) {
+            if (data.length > 10)
+            {
                 val ecu = data.slice(0..2)
                 val answerLength = data.slice(3..4)
                 val errorCode = data.slice(5..5)
@@ -226,148 +121,78 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
                 val pidString = data.slice(7..8)
                 val pidValue = data.slice(9..<data.length)
                 Log.i("OUR", ecu + ';' + answerLength + ';' + errorCode + ';' + mode + ';' + pidString + ';' + pidValue)
-                if (ecu == "7E8" && errorCode == "4" && mode == "1") {
+                if (ecu == "7E8" && errorCode == "4" && mode == "1")
+                {
                     val pid = ObdPids[pidString]
                     return Pair(pid, pid.decoder.decode(pidValue))
                 }
             }
-            return Pair(NO_PID_FOUND, RawData(rawData))
+            return Pair(NO_PID_FOUND, listOf(RawData(rawData)))
         }
     }
 }
 
+fun getA(input : String) : Double { return input.slice(0..1).toUInt(radix = 16).toDouble() }
+fun getB(input : String) : Double { return input.slice(2..3).toUInt(radix = 16).toDouble() }
+fun getC(input : String) : Double { return input.slice(4..5).toUInt(radix = 16).toDouble() }
+fun getD(input : String) : Double { return input.slice(6..7).toUInt(radix = 16).toDouble() }
 
-enum class Decoders(val decode: (String) -> DecodedValue) {
+fun getAB(input : String) : Double { return input.slice(0..3).toUInt(radix = 16).toDouble() }
+fun getCD(input : String) : Double { return input.slice(4..7).toUInt(radix = 16).toDouble() }
 
-    DEFAULT({ value -> RawData(value) }),
-    BOOLEAN({ value -> SingleValue(Parser(value).bits[7].toDouble(), Printers.BOOLEAN) }),
-    INTEGER({ value -> SingleValue(Parser(value).A, Printers.PLAIN) }),
-    AIR_FUEL_RATIO({ value -> SingleValue(Parser(value).AB / 32768, Printers.PLAIN) }),
-    PERCENT({ value -> SingleValue(Parser(value).A * 100 / 255, Printers.PERCENTAGE) }),
-    PERCENT_CENTERED({ value -> SingleValue((Parser(value).A * 100 / 128) - 100, Printers.PERCENTAGE) }),
-    ABSOLUTE_LOAD({ value -> SingleValue(Parser(value).AB * 100 / 255, Printers.PERCENTAGE) }),
-    SPEED({ value -> SingleValue(Parser(value).A, Printers.SPEED) }),
-    MODULE_VOLTAGE({ value -> SingleValue(Parser(value).AB / 1000, Printers.VOLTAGE) }),
-    TEMPERATURE({ value -> SingleValue(Parser(value).A + 233, Printers.TEMPERATURE) }),
-    SENSOR_TEMPERATURE({ value -> SingleValue(Parser(value).AB / 10 + 233, Printers.TEMPERATURE) }),
-    FUEL_PRESSURE({ value -> SingleValue(Parser(value).A * 3, Printers.PRESSURE_KPA) }),
-    PRESSURE({ value -> SingleValue(Parser(value).A, Printers.PRESSURE_KPA) }),
-    RAIL_PRESSURE({ value -> SingleValue(Parser(value).AB * 0.079f, Printers.PRESSURE_KPA) }),
-    RAIL_GAUGE_PRESSURE({ value -> SingleValue(Parser(value).AB * 10, Printers.PRESSURE_KPA) }),
-    VAPOR_PRESSURE({ value -> SingleValue(Parser(value).AB / 200, Printers.PRESSURE_KPA) }),
-    EVAP_PRESSURE({ value -> SingleValue(Parser(value).AB_SIGNED / 4, Printers.PRESSURE_PA) }),
-    EVAP_PRESSURE_ALT({ value -> SingleValue(Parser(value).AB_SIGNED, Printers.PRESSURE_PA) }),
-    RPM({ value -> SingleValue(Parser(value).AB / 4, Printers.ENGINE_SPEED) }),
-    TIMING_ADVANCE({ value -> SingleValue(Parser(value).A / 2 - 64, Printers.ANGLE) }),
-    INJECT_TIMING({ value -> SingleValue(Parser(value).AB / 128 - 210, Printers.ANGLE) }),
-    AIR_FLOW_RATE({ value -> SingleValue(Parser(value).AB / 100, Printers.FLOW_GRAMS) }),
-    AIR_FLOW_RATE_MAX({ value -> SingleValue(Parser(value).A * 10, Printers.FLOW_GRAMS) }),
-    FUEL_RATE({ value -> SingleValue(Parser(value).AB / 20, Printers.FLOW_LITERS) }),
-    RUN_TIME_SEC({ value -> SingleValue(Parser(value).AB, Printers.TIME) }),
-    RUN_TIME_MIN({ value -> SingleValue(Parser(value).AB * 60, Printers.TIME) }),
-    DISTANCE({ value -> SingleValue(Parser(value).AB, Printers.DISTANCE) }),
+fun getSignedAB(input : String) : Double { return input.slice(0..3).toInt(radix = 16).toDouble() }
 
-    SENSOR_VOLTAGE({ value -> TwoValues(Parser(value).A / 200, (Parser(value).B * 100 / 128) - 100, Printers.VOLTAGE_AND_PERCENTAGE) }),
-    OXYGEN_VOLTAGE({ value -> TwoValues(Parser(value).AB / 32768, Parser(value).CD / 8192, Printers.RATIO_AND_VOLTAGE) }),
-    OXYGEN_SENSOR({ value -> TwoValues(Parser(value).AB / 32768, Parser(value).CD / 256 - 128, Printers.RATIO_AND_MILLIAMPERE) }),
-    TWO_PERCENT_CENTERED({ value -> TwoValues((Parser(value).A * 100 / 128) - 100, (Parser(value).B * 100 / 128) - 100, Printers.TWO_PERCENTS) }),
+fun getNum(input : String) : ULong { return input.slice(0..7).toULong(16) }
+fun getBitsFourBytes(input : String) : List<UInt> { return List(32) { i -> ((getNum(input) shr i) and 1u).toUInt() }.reversed() }
+fun getBitsFirstByte(input : String) : List<UInt> { return List(8) { i -> ((getNum(input) shr i) and 1u).toUInt() }.reversed() } // TODO
 
-    MAX_VALUES({ value -> FourValues(Parser(value).A, Parser(value).B, Parser(value).C, Parser(value).D * 10, Printers.MAX_VALUES) }),
+enum class Decoders(val decode: (String) -> List<Value>) {
+    DEFAULT({ input -> listOf(RawData(input)) }),
+    BOOLEAN({ input -> listOf(Bool(getBitsFirstByte(input)[7] != 0u)) }),
+    INTEGER({ input -> listOf(RawData(getA(input).toString())) }),
+    AIR_FUEL_RATIO({ input -> listOf(Ratio(getAB(input) / 32768)) }),
+    PERCENT({ input -> listOf(Ratio.percents(getA(input) * 100 / 255)) }),
+    PERCENT_CENTERED({ input -> listOf(Ratio.percents((getA(input) * 100 / 128) - 100)) }),
+    ABSOLUTE_LOAD({ input -> listOf(Ratio.percents(getAB(input) * 100 / 255)) }),
+    SPEED({ input -> listOf(Speed.kiloMetersPerHour(getA(input))) }),
+    MODULE_VOLTAGE({ input -> listOf(Voltage(getAB(input) / 1000)) }),
+    TEMPERATURE({ input -> listOf(Temperature.celsius(getA(input) - 40)) }),
+    SENSOR_TEMPERATURE({ input -> listOf(Temperature.celsius(getAB(input) / 10 - 40)) }),
+    FUEL_PRESSURE({ input -> listOf(Pressure.kiloPascal(getA(input) * 3)) }),
+    PRESSURE({ input -> listOf(Pressure.kiloPascal(getA(input))) }),
+    RAIL_PRESSURE({ input -> listOf(Pressure.kiloPascal(getAB(input) * 0.079f)) }),
+    RAIL_GAUGE_PRESSURE({ input -> listOf(Pressure.kiloPascal(getAB(input) * 10)) }),
+    VAPOR_PRESSURE({ input -> listOf(Pressure.kiloPascal(getAB(input) / 200)) }),
+    EVAP_PRESSURE({ input -> listOf(Pressure(getSignedAB(input) / 4)) }),
+    EVAP_PRESSURE_ALT({ input -> listOf(Pressure(getSignedAB(input))) }),
+    RPM({ input -> listOf(Frequency.revolutionsPerMinute(getAB(input) / 4)) }),
+    TIMING_ADVANCE({ input -> listOf(Ratio(getA(input) / 2 - 64)) }),
+    INJECT_TIMING({ input -> listOf(Ratio(getAB(input) / 128 - 210)) }),
+    AIR_FLOW_RATE({ input -> listOf(MassFlow.gramsPerSecond(getAB(input) / 100)) }),
+    AIR_FLOW_RATE_MAX({ input -> listOf(MassFlow.gramsPerSecond(getA(input) * 10)) }),
+    FUEL_RATE({ input -> listOf(VolumeFlow(getAB(input) / 20)) }),
+    RUN_TIME_SEC({ input -> listOf(Time(getAB(input))) }),
+    RUN_TIME_MIN({ input -> listOf(Time.minutes(getAB(input))) }),
+    DISTANCE({ input -> listOf(Distance(getAB(input))) }),
 
-    SENSORS_1_8({ value -> EightValues(Parser(value).bits[7].toDouble(), Parser(value).bits[6].toDouble(), Parser(value).bits[5].toDouble(), Parser(value).bits[4].toDouble(),
-                                                 Parser(value).bits[3].toDouble(), Parser(value).bits[2].toDouble(), Parser(value).bits[1].toDouble(), Parser(value).bits[0].toDouble(), Printers.SENSORS_1_8)
-    }),
-    SENSORS_1_8_ALT({ value -> EightValues(Parser(value).bits[7].toDouble(), Parser(value).bits[6].toDouble(), Parser(value).bits[5].toDouble(), Parser(value).bits[4].toDouble(),
-                                                     Parser(value).bits[3].toDouble(), Parser(value).bits[2].toDouble(), Parser(value).bits[1].toDouble(), Parser(value).bits[0].toDouble(), Printers.SENSORS_1_8)
-    }),
+    SENSOR_VOLTAGE({ input -> listOf(Voltage(getA(input) / 200), Ratio.percents((getB(input) * 100 / 128) - 100)) }),
+    OXYGEN_VOLTAGE({ input -> listOf(Ratio(getAB(input) / 32768), Voltage(getCD(input) / 8192)) }),
+    OXYGEN_SENSOR({ input -> listOf(Ratio(getAB(input) / 32768), ElectricCurrent.milliAmpere(getCD(input) / 256 - 128)) }),
+    TWO_PERCENT_CENTERED({ input -> listOf(Ratio.percents((getA(input) * 100 / 128) - 100), Ratio.percents((getB(input) * 100 / 128) - 100)) }),
 
-    FUEL_TYPE({ value -> FuelValue(FuelType[Parser(value).A.toULong()], Printers.FUEL_TYPE) }),
-    OBD_STANDARDS({ value -> OBDStandardValue(OBDStandards[Parser(value).A.toULong()], Printers.OBD_STANDARDS) }),
-    FUEL_SYSTEM_STATUS({ value -> FuelSystemStatusValue(FuelSystemStatus[Parser(value).A.toULong()], FuelSystemStatus[Parser(value).B.toULong()], Printers.FUEL_SYSTEM_STATUS) }),
-    AIR_STATUS({ value -> AirStatusValue(AirStatus[Parser(value).A.toULong()], Printers.AIR_STATUS) }),
+    MAX_VALUES({ input -> listOf(Ratio(getA(input)), Voltage(getB(input)), ElectricCurrent.milliAmpere(getC(input)), Pressure.kiloPascal(getD(input) * 10)) }),
 
-    PIDS_01_20({ value -> PidsList(Parser(value).bits, 1, Printers.PIDS_01_20) }),
-    PIDS_21_40({ value -> PidsList(Parser(value).bits, 21, Printers.PIDS_21_40) }),
-    PIDS_41_60({ value -> PidsList(Parser(value).bits, 41, Printers.PIDS_41_60) }),
-    PIDS_61_80({ value -> PidsList(Parser(value).bits, 61, Printers.PIDS_61_80) }),
+    SENSORS_1_8({ input -> getBitsFirstByte(input).reversed().map { Bool(it != 0u) } }),
+    SENSORS_1_8_ALT({ input -> getBitsFirstByte(input).reversed().map { Bool(it != 0u) } }),
+
+    FUEL_TYPE({ input -> listOf(FuelType(FuelTypes[getA(input).toULong()])) }),
+    OBD_STANDARDS({ input -> listOf(OBDStandard(OBDStandards[getA(input).toULong()])) }),
+    FUEL_SYSTEM_STATUS({ input -> listOf(FuelSystemStatus(FuelSystemStatuses[getA(input).toULong()]), FuelSystemStatus(FuelSystemStatuses[getB(input).toULong()])) }),
+    AIR_STATUS({ input -> listOf(AirStatus(AirStatuses[getA(input).toULong()])) }),
+
+    PIDS_01_20({ input -> getBitsFourBytes(input).map { Bool(it != 0u) } }),
+    PIDS_21_40({ input -> getBitsFourBytes(input).map { Bool(it != 0u) } }),
+    PIDS_41_60({ input -> getBitsFourBytes(input).map { Bool(it != 0u) } }),
+    PIDS_61_80({ input -> getBitsFourBytes(input).map { Bool(it != 0u) } }),
     ;
-
-
-    class Parser(private var rawData: String) {
-        val A = rawData.slice(0..1).toUInt(radix = 16).toDouble()
-        val B = rawData.slice(2..3).toUInt(radix = 16).toDouble()
-        val C = 1.0//rawData.slice(4..5).toUInt(radix = 16).toDouble()
-        val D = 1.0//rawData.slice(6..7).toUInt(radix = 16).toDouble()
-
-        val AB = rawData.slice(0..3).toUInt(radix = 16).toDouble()
-        val CD = 1.0//rawData.slice(4..7).toUInt(radix = 16).toDouble()
-
-        val AB_SIGNED = 1.0//rawData.slice(0..3).toInt(radix = 16).toDouble()
-
-        val num = 1//rawData.slice(0..7).toULong(16)
-        val bits = listOf<UInt>()//List(32) { i -> ((num shr i) and 1u).toUInt() }.reversed()
-    }
-}
-
-abstract class DecodedValue(private val printer: Printers) {
-    override fun toString(): String {
-        return printer.print(this)
-    }
-}
-
-class RawData(val rawData: String) : DecodedValue(Printers.DEFAULT)
-class FuelValue(val fuelType: FuelType, printer: Printers) : DecodedValue(printer)
-class OBDStandardValue(val standard: OBDStandards, printer: Printers) : DecodedValue(printer)
-class FuelSystemStatusValue(val fuelSystemStatus1: FuelSystemStatus, val fuelSystemStatus2: FuelSystemStatus, printer: Printers) : DecodedValue(printer)
-class AirStatusValue(val airStatus: AirStatus, printer: Printers) : DecodedValue(printer)
-class SingleValue(val singleValue: Double, printer: Printers) : DecodedValue(printer)
-class TwoValues(val first: Double, val second: Double, printer: Printers) : DecodedValue(printer)
-class FourValues(val first: Double, val second: Double, val third: Double, val fourth: Double, printer: Printers) : DecodedValue(printer)
-class EightValues(val first: Double, val second: Double, val third: Double, val fourth: Double,
-                  val fifth: Double, val sixth: Double, val seventh: Double, val eighth: Double, printer: Printers
-                 ) : DecodedValue(printer)
-class PidsList(val pids: List<UInt>, firstPidNumber: Int, printer: Printers) :
-    DecodedValue(printer) {
-    val hexList = List(32) {
-        if (pids[it] == 1u) (it + firstPidNumber).toString(16).padStart(2, '0').uppercase() else "0"
-    }.filter { it != "0" }
-    val pidsList = hexList.map { ObdPids[it] }
-}
-
-enum class Printers(val print: (DecodedValue) -> String) {
-    DEFAULT({ value -> (value as RawData).rawData }),
-    BOOLEAN({ value -> if ((value as SingleValue).singleValue == 0.0) "Off" else "On" }),
-    PLAIN({ value -> "${(value as SingleValue).singleValue}" }),
-    PERCENTAGE({ value -> "${(value as SingleValue).singleValue} %" }),
-    VOLTAGE({ value -> "${(value as SingleValue).singleValue} V" }),
-    TEMPERATURE({ value -> "${(value as SingleValue).singleValue} K" }),
-    PRESSURE_KPA({ value -> "${(value as SingleValue).singleValue} kPa" }),
-    PRESSURE_PA({ value -> "${(value as SingleValue).singleValue} Pa" }),
-    ENGINE_SPEED({ value -> "${(value as SingleValue).singleValue} rpm" }),
-    SPEED({ value -> "${(value as SingleValue).singleValue} km/h" }),
-    ANGLE({ value -> "${(value as SingleValue).singleValue} °" }),
-    FLOW_GRAMS({ value -> "${(value as SingleValue).singleValue} g/s" }),
-    FLOW_LITERS({ value -> "${(value as SingleValue).singleValue} L/s" }),
-    VOLTAGE_AND_PERCENTAGE({ value -> "${(value as TwoValues).first} V, ${if (value.second > 99) "N/A" else value.second} %" }),  // This implements "if B==$FF, sensor is not used in trim calculation" condition
-    TIME({ value -> "${(value as SingleValue).singleValue} sec" }),
-    DISTANCE({ value -> "${(value as SingleValue).singleValue} km" }),
-
-    RATIO_AND_VOLTAGE({ value -> "${(value as TwoValues).first} (ratio), ${value.second} V" }),
-    RATIO_AND_MILLIAMPERE({ value -> "${(value as TwoValues).first} (ratio), ${value.second} mA" }),
-    TWO_PERCENTS({ value -> "${(value as TwoValues).first} %, ${value.second} %" }),
-
-    MAX_VALUES({ value -> "${(value as FourValues).first}, ${value.second} V, ${value.third} mA, ${value.fourth} kPa" }),
-
-    SENSORS_1_8({ value -> "First: ${if ((value as EightValues).first == 0.0) "Off" else "On"}; Second: ${if (value.second == 0.0) "Off" else "On"}; Third: ${if (value.third == 0.0) "Off" else "On"}; Fourth: ${if (value.fourth == 0.0) "Off" else "On"}" +
-                                         "; Fifth: ${if (value.fifth == 0.0) "Off" else "On"}; Sixth: ${if (value.sixth == 0.0) "Off" else "On"}; Seventh: ${if (value.seventh == 0.0) "Off" else "On"}; Eighth: ${if (value.eighth == 0.0) "Off" else "On"}" }),
-
-    FUEL_TYPE({ value -> (value as FuelValue).fuelType.descrtiption }),
-    OBD_STANDARDS({ value -> (value as OBDStandardValue).standard.descrtiption }),
-    FUEL_SYSTEM_STATUS({ value -> "First: ${(value as FuelSystemStatusValue).fuelSystemStatus1.descrtiption}; Second: ${value.fuelSystemStatus2.descrtiption}" }),
-    AIR_STATUS({ value -> (value as AirStatusValue).airStatus.descrtiption }),
-
-    PIDS_01_20({ value -> "supported PIDs (1 - 20): ${(value as PidsList).hexList}"}),
-    PIDS_21_40({ value -> "supported PIDs (21 - 40): ${(value as PidsList).hexList}"}),
-    PIDS_41_60({ value -> "supported PIDs (41 - 60): ${(value as PidsList).hexList}"}),
-    PIDS_61_80({ value -> "supported PIDs (61 - 80): ${(value as PidsList).hexList}"}),
 }

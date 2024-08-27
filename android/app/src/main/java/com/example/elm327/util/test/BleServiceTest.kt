@@ -97,7 +97,7 @@ class BleServiceTest : Service() {
 
                     val data = it.split(" ")[2]
                     val (pid, value) = ObdPids.parse(data)
-                    bleRepository.updatePidValue(pid, value)
+                    bleRepository.updatePidValue(pid, value[0])  // TODO
                     Log.i(LOG_TAG, "pid ${pid.pid} updated with value $value")
                 }
             }

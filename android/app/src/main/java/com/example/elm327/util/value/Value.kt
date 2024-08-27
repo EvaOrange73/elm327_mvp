@@ -20,13 +20,23 @@ abstract class Value
     }
 }
 
-class Bool(private val bool: Boolean) : Value()
+class RawData(private val data: String) : Value()
+{
+    override val value: String = data
+
+    override fun printerSI() : String
+    {
+        return "${getSI()}"
+    }
+}
+
+class Bool(private val bool: Boolean, private val number: Int? = null) : Value()
 {
     override val value: Boolean = bool
 
     override fun printerSI() : String
     {
-        return if (value) "On" else "Off"
+        return "${if (number == null) "" else "$number - "} ${if (value) "On" else "Off"}"
     }
 }
 
