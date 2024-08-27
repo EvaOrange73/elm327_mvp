@@ -24,5 +24,5 @@ data class BleState(
     val deviceList: DeviceList = DeviceList(),
     val selectedMacAddress: MacAddress = MacAddress.getDefault(),
     val connectionState: ConnectionState = ConnectionState.NO_PERMISSIONS,
-    val pidValues: MutableMap<ObdPids, Value> = mutableMapOf(),
+    val pidValues: MutableMap<ObdPids, List<Value>> = mutableMapOf(),
 )

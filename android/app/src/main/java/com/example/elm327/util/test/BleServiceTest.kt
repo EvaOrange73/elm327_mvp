@@ -5,18 +5,20 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
+import com.example.elm327.R
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
 import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.Device
 import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
+import com.example.elm327.util.RawResourcesReader
 import com.example.elm327.util.elm.ObdPids
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import java.io.File
+
 
 class BleServiceTest : Service() {
     private val LOG_TAG = "Ble Service Test"
@@ -58,7 +60,7 @@ class BleServiceTest : Service() {
             //TODO
         }
 
-        fun selectMacAddress(macAddress: MacAddress){
+        fun selectMacAddress(macAddress: MacAddress) {
             bleRepository.updateSelectedMacAddress(macAddress)
         }
 
@@ -85,23 +87,33 @@ class BleServiceTest : Service() {
         bleRepository.updateScanState(ScanState.READY_TO_SCAN)
     }
 
+
     suspend fun generateFakePidValues() {
-        val file = File("recorded_pid_values.txt")
+        val lines = RawResourcesReader.readLines(applicationContext, R.raw.recorded_pid_values)
+        Log.i(LOG_TAG, lines[0])
+
+        bleRepository.updateConnectionState(ConnectionState.CONNECTED)
+
         while (fakeConnection) {
-            var lastTime = file.readText().split(" ")[0].toLong()
-            file.readLines().forEach {
+            var lastTime = lines[0].split(" ")[0].toLong()
+            lines.forEach {
                 if (fakeConnection) {
                     val time = it.split(" ")[0].toLong()
-                    delay((time - lastTime) / 1_000_000)
+                    val del = (time - lastTime) / 1_000_000
+                    delay(del)
                     lastTime = time
 
-                    val data = it.split(" ")[2]
+                    val data = it.split(" ")[1]
+                    Log.i(LOG_TAG, data)
+
                     val (pid, value) = ObdPids.parse(data)
-                    bleRepository.updatePidValue(pid, value[0])  // TODO
-                    Log.i(LOG_TAG, "pid ${pid.pid} updated with value $value")
+                    bleRepository.updatePidValue(pid, value)
+//                    Log.i(LOG_TAG, "pid ${pid.pid} updated with value $value after $del milliseconds")
                 }
             }
         }
+
+        bleRepository.updateConnectionState(ConnectionState.FAIL)
     }
 
 

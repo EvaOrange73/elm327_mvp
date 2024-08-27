@@ -120,7 +120,6 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
                 val mode = data.slice(6..6)
                 val pidString = data.slice(7..8)
                 val pidValue = data.slice(9..<data.length)
-                Log.i("OUR", ecu + ';' + answerLength + ';' + errorCode + ';' + mode + ';' + pidString + ';' + pidValue)
                 if (ecu == "7E8" && errorCode == "4" && mode == "1")
                 {
                     val pid = ObdPids[pidString]

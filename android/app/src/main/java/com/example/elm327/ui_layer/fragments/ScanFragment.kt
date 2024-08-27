@@ -42,6 +42,9 @@ class ScanFragment : Fragment() {
         ViewModelProviders.of(this, factory)[ScanFragmentViewModel::class.java]
     }
 
+    private var showConnectedMessage = true
+    private var showDisconnectedMessage = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
@@ -163,18 +166,26 @@ class ScanFragment : Fragment() {
             }
 
             ConnectionState.CONNECTING -> {
+                showConnectedMessage = true
+                showDisconnectedMessage = true
                 connectionButton.setBackgroundColor(Color.GRAY)
                 connectionButton.text = getString(R.string.connecting)
             }
 
             ConnectionState.CONNECTED -> {
-                Toast.makeText(context, getString(R.string.success), Toast.LENGTH_SHORT).show()
-                connectionButton.setBackgroundColor(Color.GREEN)
+                if (showConnectedMessage) {
+                    Toast.makeText(context, getString(R.string.success), Toast.LENGTH_SHORT).show()
+                    showConnectedMessage = false
+                }
+                connectionButton.setBackgroundColor(Color.GRAY)
                 connectionButton.text = getString(R.string.disconnect)
             }
 
             ConnectionState.FAIL -> {
-                Toast.makeText(context, getString(R.string.fail), Toast.LENGTH_SHORT).show()
+                if (showDisconnectedMessage) {
+                    Toast.makeText(context, getString(R.string.fail), Toast.LENGTH_SHORT).show()
+                    showDisconnectedMessage = false
+                }
                 connectionButton.setBackgroundColor(Color.GREEN)
                 connectionButton.text = getString(R.string.try_again)
             }
@@ -183,6 +194,14 @@ class ScanFragment : Fragment() {
 
     private fun connectButtonOnClick() {
         val binder = (activity as MainActivity).bleBinder
-        if (binder != null) binder.connect()
+        if (binder != null) {
+            when (viewModel.uiState.value.connectionState) {
+                ConnectionState.NO_PERMISSIONS -> TODO()
+                ConnectionState.READY_TO_CONNECT -> binder.connect()
+                ConnectionState.CONNECTING -> binder.disconnect()
+                ConnectionState.CONNECTED -> binder.disconnect()
+                ConnectionState.FAIL -> binder.connect()
+            }
+        }
     }
 }
