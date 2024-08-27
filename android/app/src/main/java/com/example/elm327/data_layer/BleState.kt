@@ -19,10 +19,20 @@ enum class ConnectionState {
     FAIL
 }
 
+enum class SyncState {
+    NO_PERMISSIONS,
+    SYNCHRONIZED,
+    NOT_SYNCHRONIZED,
+}
+
 data class BleState(
     val scanState: ScanState = ScanState.NO_PERMISSIONS,
     val deviceList: DeviceList = DeviceList(),
+
     val selectedMacAddress: MacAddress = MacAddress.getDefault(),
     val connectionState: ConnectionState = ConnectionState.NO_PERMISSIONS,
+
+    val syncState: SyncState = SyncState.NO_PERMISSIONS,
+    val carId: String? = null,
     val pidValues: MutableMap<ObdPids, List<Value>> = mutableMapOf(),
 )

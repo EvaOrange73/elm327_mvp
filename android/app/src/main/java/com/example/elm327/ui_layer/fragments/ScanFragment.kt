@@ -71,7 +71,7 @@ class ScanFragment : Fragment() {
 
         binding.button1.setOnClickListener { scanButtonOnClick() }
         binding.button2.setOnClickListener { connectButtonOnClick() }
-        binding.spinner.onItemSelectedListener = itemSelectedListener
+        binding.spinner.onItemSelectedListener = itemSelectedListener()
 
         return root
     }
@@ -131,11 +131,11 @@ class ScanFragment : Fragment() {
         binding.spinner.setSelection(spinnerList.indexOf(selectedMacAddress))
     }
 
-    private var itemSelectedListener: AdapterView.OnItemSelectedListener =
-        object : AdapterView.OnItemSelectedListener {
+    private fun itemSelectedListener(): AdapterView.OnItemSelectedListener {
+        return object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>,
-                view: View,
+                view: View?,
                 position: Int,
                 id: Long
             ) {
@@ -147,6 +147,7 @@ class ScanFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
         }
+    }
 
 
     // Connect Button

@@ -10,16 +10,16 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.elm327.data_layer.BleRepositoryImp
-import com.example.elm327.databinding.FragmentCarInfoBinding
+import com.example.elm327.databinding.FragmentMoreInfoBinding
 import com.example.elm327.ui_layer.util.TableConstructor
-import com.example.elm327.ui_layer.viewModels.CarInfoFragmentViewModel
+import com.example.elm327.ui_layer.viewModels.MoreInfoFragmentViewModel
 import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.value.Value
 import kotlinx.coroutines.launch
 
-class CarInfoFragment : Fragment() {
+class MoreInfoFragment : Fragment() {
 
-    private var _binding: FragmentCarInfoBinding? = null
+    private var _binding: FragmentMoreInfoBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -29,9 +29,9 @@ class CarInfoFragment : Fragment() {
         BleRepositoryImp.getInstance()
     }
 
-    private val viewModel: CarInfoFragmentViewModel by lazy {
-        val factory = CarInfoFragmentViewModel.Factory(bleRepository = bleRepository)
-        ViewModelProviders.of(this, factory)[CarInfoFragmentViewModel::class.java]
+    private val viewModel: MoreInfoFragmentViewModel by lazy {
+        val factory = MoreInfoFragmentViewModel.Factory(bleRepository = bleRepository)
+        ViewModelProviders.of(this, factory)[MoreInfoFragmentViewModel::class.java]
     }
 
 
@@ -40,7 +40,6 @@ class CarInfoFragment : Fragment() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect {
-                    updateCarId(viewModel.uiState.value.carId)
                     updateTable(viewModel.uiState.value.pidValues)
                 }
             }
@@ -52,11 +51,11 @@ class CarInfoFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentCarInfoBinding.inflate(inflater, container, false)
+        _binding = FragmentMoreInfoBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        binding.confirmButton.setOnClickListener { confirmButtonOnClick() }
         context?.let { TableConstructor.create(binding.table, it) }
+
 
         return root
     }
@@ -65,28 +64,6 @@ class CarInfoFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-
-    // editText
-
-    private fun updateCarId(carId: String?) {
-        if (viewModel.uiState.value.carId != null) {
-            binding.editTextText2.setText(carId)
-        }
-    }
-
-
-    // confirmButton
-
-    private fun confirmButtonOnClick() {
-        val text = binding.editTextText2.text.toString()
-        if (text.isNotEmpty()) {
-            bleRepository.updateCarId(text)
-        }
-    }
-
-
-    // table
 
     private fun updateTable(pidValues: Map<ObdPids, List<Value>>) {
         context?.let { TableConstructor.update(binding.table, it, pidValues) }

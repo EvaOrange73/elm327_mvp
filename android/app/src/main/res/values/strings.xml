@@ -9,12 +9,14 @@
 
     <string name="menu_scan">Scan</string>
     <string name="menu_car_info">Car info</string>
-    <string name="menu_history">History</string>
+    <string name="menu_history">More info</string>
 
     <string name="no_scan_permissions">no scan permissions</string>
     <string name="start">start scan</string>
     <string name="scanning">scanning…</string>
+
     <string name="select_mac_address">Select mac address:</string>
+
     <string name="no_connect_permissions">no connect permissions</string>
     <string name="connect">connect</string>
     <string name="connecting">connecting…</string>
@@ -22,13 +24,15 @@
     <string name="fail">Failed to connect</string>
     <string name="try_again">Try again</string>
     <string name="disconnect">disconnect</string>
+
     <string name="car_id">Car id</string>
 
+    <string name="no_internet_permissions">no internet permissions</string>
+    <string name="sync">synchronizing</string>
+    <string name="not_sync">synchronize</string>
 
-    <string-array name="filter">
-        <item>all</item>
-        <item>dashboard</item>
-        <item>fuel</item>
-    </string-array>
-
+    <string name="more">more info</string>
+    <string name="table_pid">pid</string>
+    <string name="table_description">description</string>
+    <string name="table_value">value</string>
 </resources>

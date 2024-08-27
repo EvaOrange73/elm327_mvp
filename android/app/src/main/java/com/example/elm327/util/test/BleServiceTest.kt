@@ -104,7 +104,6 @@ class BleServiceTest : Service() {
                     lastTime = time
 
                     val data = it.split(" ")[1]
-                    Log.i(LOG_TAG, data)
 
                     val (pid, value) = ObdPids.parse(data)
                     bleRepository.updatePidValue(pid, value)
