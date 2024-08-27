@@ -1,11 +1,16 @@
 package com.example.elm327.util.value
 
-class Time(private val timeSI: Double) : Value()
+class Time private constructor(private val timeSI: Double) : Value()
 {
     override val value: Double = timeSI
 
     companion object
     {
+        fun seconds(timeSeconds: Double) : Time
+        {
+            return Time(timeSeconds)
+        }
+
         fun minutes(timeMinutes: Double) : Time
         {
             return Time(timeMinutes * 60)
@@ -43,12 +48,17 @@ class Time(private val timeSI: Double) : Value()
     }
 }
 
-class Distance(private val distanceSI: Double) : Value()
+class Distance private constructor(private val distanceSI: Double) : Value()
 {
     override val value: Double = distanceSI
 
     companion object
     {
+        fun meters(distanceMeters: Double) : Distance
+        {
+            return Distance(distanceMeters)
+        }
+
         fun kiloMeters(distanceKiloMeters: Double) : Distance
         {
             return Distance(distanceKiloMeters * 1000)
@@ -86,12 +96,17 @@ class Distance(private val distanceSI: Double) : Value()
     }
 }
 
-class Temperature(private val temperatureSI: Double) : Value()
+class Temperature private constructor(private val temperatureSI: Double) : Value()
 {
     override val value: Double = temperatureSI
 
     companion object
     {
+        fun kelvins(temperatureKelvins: Double) : Temperature
+        {
+            return Temperature(temperatureKelvins)
+        }
+
         fun celsius(temperatureCelsius: Double) : Temperature
         {
             return Temperature(temperatureCelsius + 273.15)
@@ -129,12 +144,17 @@ class Temperature(private val temperatureSI: Double) : Value()
     }
 }
 
-class ElectricCurrent(private val electricCurrentSI: Double) : Value()
+class ElectricCurrent private constructor(private val electricCurrentSI: Double) : Value()
 {
     override val value: Double = electricCurrentSI
 
     companion object
     {
+        fun ampere(electricCurrentAmpere: Double) : ElectricCurrent
+        {
+            return ElectricCurrent(electricCurrentAmpere)
+        }
+
         fun milliAmpere(electricCurrentMilliAmpere: Double) : ElectricCurrent
         {
             return ElectricCurrent(electricCurrentMilliAmpere / 1000)
