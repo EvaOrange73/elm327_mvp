@@ -6,8 +6,8 @@ import com.example.elm327.util.value.*
 enum class ObdPids(val pid: String, val descriptionShort: String, val descriptionLong: String, val decoder: Decoders) {
     NO_PID_FOUND("", "", "", Decoders.DEFAULT),
     PID_00("00", "", "Supported PIDs [01-20]", Decoders.PIDS_01_20),
-    PID_01("01", "", "Status since DTCs cleared", Decoders.DEFAULT),  // TODO AS PID 41
-    PID_02("02", "", "DTC that triggered the freeze frame", Decoders.DEFAULT),  // TODO AS SERVICE 03
+    PID_01("01", "", "Status since DTCs cleared", Decoders.MONITOR_STATUS),
+    PID_02("02", "", "DTC that triggered the freeze frame", Decoders.DTC_TRIGGERED),
     PID_03("03", "", "Fuel System Status", Decoders.FUEL_SYSTEM_STATUS),
     PID_04("04", "", "Calculated Engine Load", Decoders.PERCENT),
     PID_05("05", "", "Engine Coolant Temperature", Decoders.TEMPERATURE),
@@ -70,7 +70,7 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
     PID_3E("3E", "", "Catalyst Temperature: Bank 1 - Sensor 2", Decoders.SENSOR_TEMPERATURE),
     PID_3F("3F", "", "Catalyst Temperature: Bank 2 - Sensor 2", Decoders.SENSOR_TEMPERATURE),
     PID_40("40", "", "Supported PIDs [41-60]", Decoders.PIDS_41_60),
-    PID_41("41", "", "Monitor status this drive cycle", Decoders.DEFAULT), // TODO AS PID 01
+    PID_41("41", "", "Monitor status this drive cycle", Decoders.MONITOR_STATUS),
     PID_42("42", "", "Control module voltage", Decoders.MODULE_VOLTAGE),
     PID_43("43", "", "Absolute load value", Decoders.ABSOLUTE_LOAD),
     PID_44("44", "", "Commanded equivalence ratio", Decoders.AIR_FUEL_RATIO),
@@ -126,7 +126,7 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
                     return Pair(pid, pid.decoder.decode(pidValue))
                 }
             }
-            return Pair(NO_PID_FOUND, listOf(RawData(rawData)))
+            return Pair(NO_PID_FOUND, listOf(RawData.raw(rawData)))
         }
     }
 }
@@ -142,19 +142,19 @@ fun getCD(input: String) : Double { return input.slice(4..7).toUInt(radix = 16).
 fun getSignedAB(input: String) : Double { return input.slice(0..3).toInt(radix = 16).toDouble() }
 fun getSignedCD(input: String) : Double { return input.slice(4..7).toInt(radix = 16).toDouble() }
 
-fun getBitsFirstByte(input: String) : List<UInt> { return List(8) { i -> ((input.slice(0..1).toULong(radix = 16) shr i) and 1u).toUInt() }.reversed() }
-fun getBitsFourBytes(input: String) : List<UInt> { return List(32) { i -> ((input.slice(0..7).toULong(radix = 16) shr i) and 1u).toUInt() }.reversed() }
+fun getBitsFirstByte(input: String) : List<Boolean> { return List(8) { i -> ((input.slice(0..1).toULong(radix = 16) shr i) and 1uL) != 0uL }.reversed() }
+fun getBitsFourBytes(input: String) : List<Boolean> { return List(32) { i -> ((input.slice(0..7).toULong(radix = 16) shr i) and 1uL) != 0uL }.reversed() }
 
 enum class Decoders(val decode: (String) -> List<Value>) {
-    DEFAULT({ input -> listOf(RawData(input)) }),
-    BOOLEAN({ input -> listOf(Bool(getBitsFirstByte(input)[7] != 0u)) }),
-    INTEGER({ input -> listOf(RawData(getA(input).toString())) }),
-    AIR_FUEL_RATIO({ input -> listOf(Ratio(getAB(input) / 32768)) }),
+    DEFAULT({ input -> listOf(RawData.raw(input)) }),
+    BOOLEAN({ input -> listOf(Bool.boolRaw(getBitsFirstByte(input)[7])) }),
+    INTEGER({ input -> listOf(RawData.raw(getA(input).toString())) }),
+    AIR_FUEL_RATIO({ input -> listOf(Ratio.ratio(getAB(input) / 32768)) }),
     PERCENT({ input -> listOf(Ratio.percents(getA(input) * 100 / 255)) }),
     PERCENT_CENTERED({ input -> listOf(Ratio.percents((getA(input) * 100 / 128) - 100)) }),
     ABSOLUTE_LOAD({ input -> listOf(Ratio.percents(getAB(input) * 100 / 255)) }),
     SPEED({ input -> listOf(Speed.kiloMetersPerHour(getA(input))) }),
-    MODULE_VOLTAGE({ input -> listOf(Voltage(getAB(input) / 1000)) }),
+    MODULE_VOLTAGE({ input -> listOf(Voltage.volts(getAB(input) / 1000)) }),
     TEMPERATURE({ input -> listOf(Temperature.celsius(getA(input) - 40)) }),
     SENSOR_TEMPERATURE({ input -> listOf(Temperature.celsius(getAB(input) / 10 - 40)) }),
     FUEL_PRESSURE({ input -> listOf(Pressure.kiloPascal(getA(input) * 3)) }),
@@ -162,36 +162,49 @@ enum class Decoders(val decode: (String) -> List<Value>) {
     RAIL_PRESSURE({ input -> listOf(Pressure.kiloPascal(getAB(input) * 0.079f)) }),
     RAIL_GAUGE_PRESSURE({ input -> listOf(Pressure.kiloPascal(getAB(input) * 10)) }),
     VAPOR_PRESSURE({ input -> listOf(Pressure.kiloPascal(getAB(input) / 200)) }),
-    EVAP_PRESSURE({ input -> listOf(Pressure(getSignedAB(input) / 4)) }),
-    EVAP_PRESSURE_ALT({ input -> listOf(Pressure(getSignedAB(input))) }),
+    EVAP_PRESSURE({ input -> listOf(Pressure.pascal(getSignedAB(input) / 4)) }),
+    EVAP_PRESSURE_ALT({ input -> listOf(Pressure.pascal(getSignedAB(input))) }),
     RPM({ input -> listOf(Frequency.revolutionsPerMinute(getAB(input) / 4)) }),
-    TIMING_ADVANCE({ input -> listOf(Ratio(getA(input) / 2 - 64)) }),
-    INJECT_TIMING({ input -> listOf(Ratio(getAB(input) / 128 - 210)) }),
+    TIMING_ADVANCE({ input -> listOf(Ratio.ratio(getA(input) / 2 - 64)) }),
+    INJECT_TIMING({ input -> listOf(Ratio.ratio(getAB(input) / 128 - 210)) }),
     AIR_FLOW_RATE({ input -> listOf(MassFlow.gramsPerSecond(getAB(input) / 100)) }),
     AIR_FLOW_RATE_MAX({ input -> listOf(MassFlow.gramsPerSecond(getA(input) * 10)) }),
-    FUEL_RATE({ input -> listOf(VolumeFlow(getAB(input) / 20)) }),
-    RUN_TIME_SEC({ input -> listOf(Time(getAB(input))) }),
+    FUEL_RATE({ input -> listOf(VolumeFlow.litersPerSecond(getAB(input) / 20)) }),
+    RUN_TIME_SEC({ input -> listOf(Time.seconds(getAB(input))) }),
     RUN_TIME_MIN({ input -> listOf(Time.minutes(getAB(input))) }),
-    DISTANCE({ input -> listOf(Distance(getAB(input))) }),
+    DISTANCE({ input -> listOf(Distance.kiloMeters(getAB(input))) }),
 
-    SENSOR_VOLTAGE({ input -> listOf(Voltage(getA(input) / 200), Ratio.percents((getB(input) * 100 / 128) - 100)) }),
-    OXYGEN_VOLTAGE({ input -> listOf(Ratio(getAB(input) / 32768), Voltage(getCD(input) / 8192)) }),
-    OXYGEN_SENSOR({ input -> listOf(Ratio(getAB(input) / 32768), ElectricCurrent.milliAmpere(getCD(input) / 256 - 128)) }),
+    SENSOR_VOLTAGE({ input -> listOf(Voltage.volts(getA(input) / 200), Ratio.percents((getB(input) * 100 / 128) - 100)) }),
+    OXYGEN_VOLTAGE({ input -> listOf(Ratio.ratio(getAB(input) / 32768), Voltage.volts(getCD(input) / 8192)) }),
+    OXYGEN_SENSOR({ input -> listOf(Ratio.ratio(getAB(input) / 32768), ElectricCurrent.milliAmpere(getCD(input) / 256 - 128)) }),
     TWO_PERCENT_CENTERED({ input -> listOf(Ratio.percents((getA(input) * 100 / 128) - 100), Ratio.percents((getB(input) * 100 / 128) - 100)) }),
 
-    MAX_VALUES({ input -> listOf(Ratio(getA(input)), Voltage(getB(input)), ElectricCurrent.milliAmpere(getC(input)), Pressure.kiloPascal(getD(input) * 10)) }),
-
-    SENSORS_1_8({ input -> getBitsFirstByte(input).reversed().mapIndexed { index, it -> Bool(it != 0u, (index + 1).toString()) } }),
-    SENSORS_1_8_ALT({ input -> getBitsFirstByte(input).reversed().mapIndexed { index, it -> Bool(it != 0u, (index + 1).toString()) } }),
+    MAX_VALUES({ input -> listOf(Ratio.ratio(getA(input)), Voltage.volts(getB(input)), ElectricCurrent.milliAmpere(getC(input)), Pressure.kiloPascal(getD(input) * 10)) }),
+    MONITOR_STATUS({ input -> listOf(
+        Bool.boolIndexed(getBitsFirstByte(input)[0], "MIL"), Ratio.ratio((getA(input).toULong() % 128uL).toDouble()),
+        Bool.boolIndexed(getBitsFourBytes(input)[9], "Components completeness"), Bool.boolIndexed(getBitsFourBytes(input)[10], "Fuel System completeness"), Bool.boolIndexed(getBitsFourBytes(input)[11], "Misfire completeness"),
+        RawData.raw(if (getBitsFourBytes(input)[12]) "Compression ignition" else "Spark ignition"),
+        Bool.boolIndexed(getBitsFourBytes(input)[13], "Components availability"), Bool.boolIndexed(getBitsFourBytes(input)[14], "Fuel System availability"), Bool.boolIndexed(getBitsFourBytes(input)[15], "Misfire availability"),
+                                              ) +
+        getBitsFourBytes(input).slice(16..23).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 1)) } +
+        getBitsFourBytes(input).slice(24..31).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 1)) }
+                   }),
+    DTC_TRIGGERED({ input -> listOf(Ratio.ratio(getA(input)), Voltage.volts(getB(input)), ElectricCurrent.milliAmpere(getC(input)), Pressure.kiloPascal(getD(input) * 10)) }),
+    SENSORS_1_8({ input -> listOf(RawData.raw(if (!getBitsFirstByte(input)[0] && !getBitsFirstByte(input)[1]) "P "        // 00
+                                                        else if (!getBitsFirstByte(input)[0] && getBitsFirstByte(input)[1]) "C "    // 01
+                                                        else if (getBitsFirstByte(input)[0] && !getBitsFirstByte(input)[1]) "B "    // 10
+                                                        else "U " +                                                                 // 11
+                                                        Integer.toHexString((getA(input).toUInt() % 64u).toInt()) + ' ' + Integer.toHexString(getB(input).toInt()))) }),
+    SENSORS_1_8_ALT({ input -> getBitsFirstByte(input).reversed().mapIndexed { index, it -> Bool.boolIndexed(it, (index + 1).toString()) } }),
 
     FUEL_TYPE({ input -> listOf(FuelType.fromULong(getA(input).toULong())) }),
     OBD_STANDARDS({ input -> listOf(OBDStandard.fromULong(getA(input).toULong())) }),
     FUEL_SYSTEM_STATUS({ input -> listOf(FuelSystemStatus.fromULong(getA(input).toULong()), FuelSystemStatus.fromULong(getB(input).toULong())) }),
     AIR_STATUS({ input -> listOf(AirStatus.fromULong(getA(input).toULong())) }),
 
-    PIDS_01_20({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool(it != 0u, Integer.toHexString(index + 1)) } }),
-    PIDS_21_40({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool(it != 0u, Integer.toHexString(index + 21)) } }),
-    PIDS_41_60({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool(it != 0u, Integer.toHexString(index + 41)) } }),
-    PIDS_61_80({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool(it != 0u, Integer.toHexString(index + 61)) } }),
+    PIDS_01_20({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 1)) } }),
+    PIDS_21_40({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 21)) } }),
+    PIDS_41_60({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 41)) } }),
+    PIDS_61_80({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 61)) } }),
     ;
 }

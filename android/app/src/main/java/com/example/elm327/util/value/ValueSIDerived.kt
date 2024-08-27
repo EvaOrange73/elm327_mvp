@@ -1,11 +1,16 @@
 package com.example.elm327.util.value
 
-class Speed(private val speedSI: Double) : Value()
+class Speed private constructor(private val speedSI: Double) : Value()
 {
     override val value: Double = speedSI
 
     companion object
     {
+        fun metersPerSecond(speedMetersPerSecond: Double) : Speed
+        {
+            return Speed(speedMetersPerSecond)
+        }
+
         fun kiloMetersPerHour(speedKiloMetersPerHour: Double) : Speed
         {
             return Speed(speedKiloMetersPerHour / 3.6)
@@ -43,12 +48,17 @@ class Speed(private val speedSI: Double) : Value()
     }
 }
 
-class Frequency(private val frequencySI: Double) : Value()
+class Frequency private constructor(private val frequencySI: Double) : Value()
 {
     override val value: Double = frequencySI
 
     companion object
     {
+        fun revolutionsPerSecond(frequencyRevolutionsPerSecond: Double) : Frequency
+        {
+            return Frequency(frequencyRevolutionsPerSecond)
+        }
+
         fun revolutionsPerMinute(frequencyRevolutionsPerMinute: Double) : Frequency
         {
             return Frequency(frequencyRevolutionsPerMinute / 60)
@@ -86,12 +96,17 @@ class Frequency(private val frequencySI: Double) : Value()
     }
 }
 
-class Pressure(private val pressureSI: Double) : Value()
+class Pressure private constructor(private val pressureSI: Double) : Value()
 {
     override val value: Double = pressureSI
 
     companion object
     {
+        fun pascal(pressurePascal: Double) : Pressure
+        {
+            return Pressure(pressurePascal)
+        }
+
         fun kiloPascal(pressureKiloPascal: Double) : Pressure
         {
             return Pressure(pressureKiloPascal * 1000)
@@ -114,12 +129,17 @@ class Pressure(private val pressureSI: Double) : Value()
     }
 }
 
-class Voltage(private val voltageSI: Double) : Value()
+class Voltage private constructor(private val voltageSI: Double) : Value()
 {
     override val value: Double = voltageSI
 
     companion object
     {
+        fun volts(voltageVolts: Double) : Voltage
+        {
+            return Voltage(voltageVolts)
+        }
+
         fun milliVolts(voltageMilliVolts: Double) : Voltage
         {
             return Voltage(voltageMilliVolts / 1000)
@@ -142,12 +162,17 @@ class Voltage(private val voltageSI: Double) : Value()
     }
 }
 
-class MassFlow(private val flowSI: Double) : Value()
+class MassFlow private constructor(private val flowSI: Double) : Value()
 {
     override val value: Double = flowSI
 
     companion object
     {
+        fun kiloGramsPerSecond(flowKiloGramsPerSecond: Double) : MassFlow
+        {
+            return MassFlow(flowKiloGramsPerSecond)
+        }
+
         fun gramsPerSecond(flowGramsPerSecond: Double) : MassFlow
         {
             return MassFlow(flowGramsPerSecond / 1000)
@@ -170,12 +195,17 @@ class MassFlow(private val flowSI: Double) : Value()
     }
 }
 
-class VolumeFlow(private val flowSI: Double) : Value()
+class VolumeFlow private constructor(private val flowSI: Double) : Value()
 {
     override val value: Double = flowSI
 
     companion object
     {
+        fun cubicMetersPerSecond(flowCubicMetersPerSecond: Double) : VolumeFlow
+        {
+            return VolumeFlow(flowCubicMetersPerSecond)
+        }
+
         fun litersPerSecond(flowLitersPerSecond: Double) : VolumeFlow
         {
             return VolumeFlow(flowLitersPerSecond / 1000)

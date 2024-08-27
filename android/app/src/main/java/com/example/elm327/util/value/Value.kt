@@ -20,9 +20,17 @@ abstract class Value
     }
 }
 
-class RawData(private val data: String) : Value()
+class RawData private constructor(private val data: String) : Value()
 {
     override val value: String = data
+
+    companion object
+    {
+        fun raw(rawData: String) : RawData
+        {
+            return RawData(rawData)
+        }
+    }
 
     override fun printerSI() : String
     {
@@ -30,22 +38,40 @@ class RawData(private val data: String) : Value()
     }
 }
 
-class Bool(private val bool: Boolean, private val number: String? = null) : Value()
+class Bool private constructor(private val bool: Boolean, private val index: String? = null) : Value()
 {
     override val value: Boolean = bool
 
+    companion object
+    {
+        fun boolRaw(boolean: Boolean) : Bool
+        {
+            return Bool(boolean)
+        }
+
+        fun boolIndexed(boolean: Boolean, index: String) : Bool
+        {
+            return Bool(boolean, index)
+        }
+    }
+
     override fun printerSI() : String
     {
-        return "${if (number == null) "" else "$number - "} ${if (value) "On" else "Off"}"
+        return "${if (index == null) "" else "$index - "} ${if (value) "On" else "Off"}"
     }
 }
 
-class Ratio(private val ratioSI: Double) : Value()
+class Ratio private constructor(private val ratioSI: Double) : Value()
 {
     override val value: Double = ratioSI
 
     companion object
     {
+        fun ratio(ratioRaw: Double) : Ratio
+        {
+            return Ratio(ratioRaw)
+        }
+
         fun percents(ratioPercents: Double) : Ratio
         {
             return Ratio(ratioPercents / 100)
