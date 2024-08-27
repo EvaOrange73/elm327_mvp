@@ -55,6 +55,7 @@ class BleRepositoryImp private constructor() : BleRepository {
     }
 
     fun updatePidValue(pid: ObdPids, values: List<Value>) {
+        BleNetworkDataSource.updatePid("1", null,  System.currentTimeMillis(), pid, values )
         _uiState.update {
             it.also { it.pidValues[pid] = values }
         }
