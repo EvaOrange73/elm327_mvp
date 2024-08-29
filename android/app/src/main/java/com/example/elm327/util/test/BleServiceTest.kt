@@ -65,9 +65,8 @@ class BleServiceTest : Service() {
         }
 
         @RequiresApi(Build.VERSION_CODES.P)
-        fun selectMacAddress(macAddress: MacAddress, activity: MainActivity) {
+        fun selectMacAddress(macAddress: MacAddress) {
             bleRepository.updateSelectedMacAddress(macAddress)
-            activity.writeToPreference(MacAddress.preferenceKey, macAddress.toString())
         }
 
         @OptIn(DelicateCoroutinesApi::class)
