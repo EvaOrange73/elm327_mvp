@@ -32,7 +32,7 @@ data class BleState(
     val selectedMacAddress: MacAddress = MacAddress.getDefault(),
     val connectionState: ConnectionState = ConnectionState.NO_PERMISSIONS,
 
-    val syncState: SyncState = SyncState.NO_PERMISSIONS,
+    val syncState: SyncState = SyncState.NOT_SYNCHRONIZED, // TODO: check permissions
     val carId: String? = null,
     val pidValues: MutableMap<ObdPids, List<Value>> = mutableMapOf(),
 )

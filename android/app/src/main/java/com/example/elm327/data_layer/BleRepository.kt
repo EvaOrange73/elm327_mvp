@@ -55,17 +55,25 @@ class BleRepositoryImp private constructor() : BleRepository {
     }
 
     fun updatePidValue(pid: ObdPids, values: List<Value>) {
-        BleNetworkDataSource.updatePid("1", null,  System.currentTimeMillis(), pid, values )
+        if (_uiState.value.carId != null) {
+            BleNetworkDataSource.updatePid(
+                _uiState.value.carId!!,
+                null,
+                System.currentTimeMillis(),
+                pid,
+                values
+            )
+        }
         _uiState.update {
             val newMap = it.pidValues.toMutableMap()
             newMap[pid] = values
-            it.copy ( pidValues = newMap )
+            it.copy(pidValues = newMap)
         }
     }
 
-    fun updateCarId(carId: String){
+    fun updateCarId(carId: String) {
         _uiState.update {
-            it.copy(carId = carId)
+            it.copy(carId = carId, syncState = SyncState.SYNCHRONIZED)
         }
     }
 }

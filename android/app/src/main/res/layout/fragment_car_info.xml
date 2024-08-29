@@ -63,7 +63,7 @@
             tools:layout_editor_absoluteY="140dp" />
 
         <Button
-            android:id="@+id/confirmButton"
+            android:id="@+id/syncButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"

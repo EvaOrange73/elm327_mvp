@@ -1,5 +1,6 @@
 package com.example.elm327.ui_layer.fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.elm327.R
 import com.example.elm327.data_layer.BleRepositoryImp
+import com.example.elm327.data_layer.SyncState
 import com.example.elm327.databinding.FragmentCarInfoBinding
 import com.example.elm327.ui_layer.util.TableConstructor
 import com.example.elm327.ui_layer.viewModels.CarInfoFragmentViewModel
@@ -41,6 +44,7 @@ class CarInfoFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect {
                     updateCarId(viewModel.uiState.value.carId)
+                    updatesyncButton(viewModel.uiState.value.syncButtonState)
                     updateTable(viewModel.uiState.value.pidValues)
                 }
             }
@@ -55,7 +59,7 @@ class CarInfoFragment : Fragment() {
         _binding = FragmentCarInfoBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        binding.confirmButton.setOnClickListener { confirmButtonOnClick() }
+        binding.syncButton.setOnClickListener { syncButtonOnClick() }
         context?.let { TableConstructor.create(binding.table, it) }
 
         return root
@@ -76,9 +80,28 @@ class CarInfoFragment : Fragment() {
     }
 
 
-    // confirmButton
+    // syncButton
 
-    private fun confirmButtonOnClick() {
+    private fun updatesyncButton(syncState: SyncState){
+        val syncButton = binding.syncButton
+        when (syncState){
+            SyncState.NO_PERMISSIONS -> {
+                syncButton.text = getString(R.string.no_internet_permissions)
+                syncButton.setBackgroundColor(Color.RED)
+            }
+            SyncState.SYNCHRONIZED -> {
+                syncButton.text = getString(R.string.sync)
+                syncButton.setBackgroundColor(Color.GRAY)
+            }
+            SyncState.NOT_SYNCHRONIZED -> {
+                syncButton.text = getString(R.string.not_sync)
+                syncButton.setBackgroundColor(Color.GREEN)
+            }
+        }
+    }
+
+    private fun syncButtonOnClick() {
+        binding.editTextText2.clearFocus()
         val text = binding.editTextText2.text.toString()
         if (text.isNotEmpty()) {
             bleRepository.updateCarId(text)
