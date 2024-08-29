@@ -20,7 +20,7 @@ class BleNetworkDataSource {
 
         fun updatePid(
             id: String,
-            location: Location?,
+            location: Location,
             timestamp: Long,
             pid: ObdPids,
             values: List<Value>
@@ -30,16 +30,14 @@ class BleNetworkDataSource {
                 .host("mtrack-test.oqode.ru")
                 .port(5055)
                 .addQueryParameter("id", id)
-//                .addQueryParameter("lat", location.latitude.toString())
-//                .addQueryParameter("lon", location.longitude.toString())
-                .addQueryParameter("lat", "48.8566")
-                .addQueryParameter("lon", "2.3522")
+                .addQueryParameter("lat", location.latitude.toString())
+                .addQueryParameter("lon", location.longitude.toString())
                 .addQueryParameter("timestamp", timestamp.toString())
                 .addQueryParameter("pid", pid.pid)
                 .addQueryParameter("values", values.joinToString(" ") { it.toString() })
                 .build()
 
-//            Log.i(LOG_TAG, httpUrl.toString())
+            Log.i(LOG_TAG, httpUrl.toString())
 
             val request: Request = Request.Builder().url(httpUrl).build()
 

@@ -1,5 +1,7 @@
 package com.example.elm327.data_layer
 
+import android.location.Location
+import android.util.Log
 import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.util.elm.ObdPids
@@ -25,6 +27,13 @@ class BleRepositoryImp private constructor() : BleRepository {
 
         fun getInstance() = instance ?: synchronized(this) {
             instance ?: BleRepositoryImp().also { instance = it }
+        }
+    }
+
+    fun updateLocation(location: Location){
+        Log.i(LOG_TAG, "${location.longitude} ${location.latitude}")
+        _uiState.update {
+            it.copy(location = location)
         }
     }
 
@@ -55,10 +64,10 @@ class BleRepositoryImp private constructor() : BleRepository {
     }
 
     fun updatePidValue(pid: ObdPids, values: List<Value>) {
-        if (_uiState.value.carId != null) {
+        if (_uiState.value.carId != null && _uiState.value.location != null) {
             BleNetworkDataSource.updatePid(
                 _uiState.value.carId!!,
-                null,
+                _uiState.value.location!!,
                 System.currentTimeMillis(),
                 pid,
                 values
