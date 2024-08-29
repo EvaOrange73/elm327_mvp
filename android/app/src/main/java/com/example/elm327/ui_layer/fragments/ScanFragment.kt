@@ -141,7 +141,7 @@ class ScanFragment : Fragment() {
             ) {
                 val item = parent.getItemAtPosition(position) as String
                 val binder = (activity as MainActivity).bleBinder
-                binder?.selectMacAddress(MacAddress(item))
+                binder?.selectMacAddress(MacAddress(item), (activity as MainActivity))
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {

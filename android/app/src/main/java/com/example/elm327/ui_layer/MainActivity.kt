@@ -20,11 +20,13 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.elm327.R
+import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
 import com.example.elm327.util.test.BleServiceTest
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+
 
 @RequiresApi(Build.VERSION_CODES.P)
 class MainActivity : AppCompatActivity() {
@@ -35,11 +37,8 @@ class MainActivity : AppCompatActivity() {
 
     private val permissions: Permissions = Permissions(this@MainActivity)
     private val bluetoothAdapter: BluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
-    private val locationManager: LocationManager by lazy {
-        applicationContext.getSystemService(
-            LOCATION_SERVICE
-        ) as LocationManager
-    }
+    private val locationManager: LocationManager by lazy { applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager }
+    private val sharedPreferences: String = "preferenceName"
 
     var bound = false
 
@@ -71,6 +70,12 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        val res = getPreferenceValue(MacAddress.preferenceKey)
+        if (res != null && res != "")
+        {
+            MacAddress.setDefault(res)
+        }
 
         permissions.showPermissionsState()
 
@@ -113,13 +118,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String?>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    fun getPreferenceValue(key: String): String?
+    {
+        return getSharedPreferences(sharedPreferences, 0).getString(key, "")
+    }
+
+    fun writeToPreference(key: String, value: String?)
+    {
+        val editor = getSharedPreferences(sharedPreferences, 0).edit()
+        editor.putString(key, value)
+        editor.apply()
     }
 }
 

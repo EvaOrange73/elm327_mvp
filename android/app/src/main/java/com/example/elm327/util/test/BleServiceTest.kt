@@ -3,8 +3,11 @@ package com.example.elm327.util.test
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import com.example.elm327.R
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
@@ -12,6 +15,7 @@ import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.Device
 import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
+import com.example.elm327.ui_layer.MainActivity
 import com.example.elm327.util.RawResourcesReader
 import com.example.elm327.util.elm.ObdPids
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -60,8 +64,10 @@ class BleServiceTest : Service() {
             //TODO
         }
 
-        fun selectMacAddress(macAddress: MacAddress) {
+        @RequiresApi(Build.VERSION_CODES.P)
+        fun selectMacAddress(macAddress: MacAddress, activity: MainActivity) {
             bleRepository.updateSelectedMacAddress(macAddress)
+            activity.writeToPreference(MacAddress.preferenceKey, macAddress.toString())
         }
 
         @OptIn(DelicateCoroutinesApi::class)

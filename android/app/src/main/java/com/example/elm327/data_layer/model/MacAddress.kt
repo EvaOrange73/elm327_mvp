@@ -21,12 +21,20 @@ class MacAddress(private val macAddress: String) {
     }
 
     companion object {
+        val preferenceKey: String = "macAddressDefault"
+        private var default: String = "00:10:CC:4F:36:03"
+        private val blue: String = "00:10:CC:4F:36:03"
+        private var red: String = "22:C0:00:03:61:2E"
+
+        fun setDefault(value: String) {
+            default = value
+        }
+
         fun getDefault(source: String = "last"): MacAddress {
-            // TODO сохранять в файл последний выбранный мак адрес как дефолтный
             return when (source) {
-                "last" -> MacAddress("00:10:CC:4F:36:03")
-                "синий" -> MacAddress("00:10:CC:4F:36:03")
-                "красный" -> MacAddress("22:C0:00:03:61:2E")
+                "last" -> MacAddress(default)
+                "синий" -> MacAddress(blue)
+                "красный" -> MacAddress(red)
                 else -> MacAddress(source)
             }
         }
