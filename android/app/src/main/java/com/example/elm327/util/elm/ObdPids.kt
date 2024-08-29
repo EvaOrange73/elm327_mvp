@@ -1,7 +1,9 @@
 package com.example.elm327.util.elm
 
 import android.util.Log
+import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.value.*
+import java.sql.Timestamp
 
 enum class ObdPids(val pid: String, val descriptionShort: String, val descriptionLong: String, val decoder: Decoders) {
     NO_PID_FOUND("", "", "", Decoders.DEFAULT),
@@ -109,7 +111,7 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
         private val map: Map<String, ObdPids> = entries.associateBy(ObdPids::pid)
 
         operator fun get(pid: String) = map[pid] ?: NO_PID_FOUND
-        fun parse(rawData: String): Pair<ObdPids, List<Value>>
+        fun parse(rawData: String, timestamp: Long): DecodedPidValue
         {
             val data = rawData.replace("\\s".toRegex(), "")
             if (data.length > 10)
@@ -123,10 +125,10 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
                 if (ecu == "7E8" && errorCode == "4" && mode == "1")
                 {
                     val pid = ObdPids[pidString]
-                    return Pair(pid, pid.decoder.decode(pidValue))
+                    return DecodedPidValue(timestamp, rawData, pid, pid.decoder.decode(pidValue))
                 }
             }
-            return Pair(NO_PID_FOUND, listOf(RawData.raw(rawData)))
+            return DecodedPidValue(timestamp, rawData, NO_PID_FOUND, listOf(RawData.raw(rawData)))
         }
     }
 }

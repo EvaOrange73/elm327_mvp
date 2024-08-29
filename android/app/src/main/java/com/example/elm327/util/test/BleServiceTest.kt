@@ -110,8 +110,8 @@ class BleServiceTest : Service() {
 
                     val data = it.split(" ")[1]
 
-                    val (pid, value) = ObdPids.parse(data)
-                    bleRepository.updatePidValue(pid, value)
+                    val decodedPidValue = ObdPids.parse(data, System.currentTimeMillis())
+                    bleRepository.updatePidValue(decodedPidValue)
 //                    Log.i(LOG_TAG, "pid ${pid.pid} updated with value $value after $del milliseconds")
                 }
             }

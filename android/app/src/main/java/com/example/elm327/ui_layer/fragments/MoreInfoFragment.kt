@@ -13,6 +13,7 @@ import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.databinding.FragmentMoreInfoBinding
 import com.example.elm327.ui_layer.util.TableConstructor
 import com.example.elm327.ui_layer.viewModels.MoreInfoFragmentViewModel
+import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.value.Value
 import kotlinx.coroutines.launch
@@ -65,7 +66,7 @@ class MoreInfoFragment : Fragment() {
         _binding = null
     }
 
-    private fun updateTable(pidValues: Map<ObdPids, List<Value>>) {
+    private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {
         context?.let { TableConstructor.update(binding.table, it, pidValues) }
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.elm327.data_layer.BleRepository
+import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.value.Value
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class MoreInfoFragmentViewState(
-    val pidValues: Map<ObdPids, List<Value>> = mutableMapOf(),
+    val pidValues: Map<ObdPids, DecodedPidValue> = mapOf(),
 )
 
 class MoreInfoFragmentViewModel(private val bleRepository: BleRepository) : ViewModel(){

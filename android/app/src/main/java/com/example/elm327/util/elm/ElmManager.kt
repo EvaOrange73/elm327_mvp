@@ -9,6 +9,7 @@ import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.data.Data
+import java.sql.Timestamp
 import java.util.UUID
 
 
@@ -48,7 +49,7 @@ class ElmManager(context: Context): BleManager(context)
         setNotificationCallback(readCharacteristic).with { bluetoothDevice: BluetoothDevice, data: Data ->
             val value = data.getStringValue(0)!!
             Log.i(OUR_TAG, value)
-            Log.i(OUR_TAG, ObdPids.parse(value).second.toString())
+            Log.i(OUR_TAG, ObdPids.parse(value, System.currentTimeMillis()).valuesAsString())
         }
         beginAtomicRequestQueue().add(enableNotifications(readCharacteristic)
             .fail { _: BluetoothDevice, status: Int ->

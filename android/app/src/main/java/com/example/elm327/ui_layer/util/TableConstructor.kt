@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.core.view.marginTop
 import androidx.core.view.setPadding
 import com.example.elm327.R
+import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.value.Value
 
@@ -26,15 +27,15 @@ class TableConstructor {
             )
         }
 
-        fun update(table: TableLayout, context: Context, pidValues: Map<ObdPids, List<Value>>) {
+        fun update(table: TableLayout, context: Context, pidValues: Map<ObdPids, DecodedPidValue>) {
             table.removeViews(1, (table.childCount - 1).coerceAtLeast(0))
-            pidValues.forEach { (pid, values) ->
+            pidValues.forEach { (pid, value) ->
                 table.addView(
                     createRow(
                         context,
                         weights.sum(),
                         listOf(
-                            pid.pid, pid.descriptionLong, values[0].printerSI()
+                            pid.pid, pid.descriptionLong, value.valuesAsString()
                         ).zip(weights).toMap()
                     )
                 )

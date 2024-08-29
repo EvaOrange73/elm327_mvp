@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.elm327.data_layer.BleRepository
 import com.example.elm327.data_layer.SyncState
+import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.value.Value
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 data class CarInfoFragmentViewState(
     val carId: String? = null,
     val syncButtonState: SyncState = SyncState.NO_PERMISSIONS,
-    val pidValues: Map<ObdPids, List<Value>> = mutableMapOf(),
+    val pidValues: Map<ObdPids, DecodedPidValue> = mapOf(),
 )
 
 class CarInfoFragmentViewModel(private val bleRepository: BleRepository) : ViewModel() {

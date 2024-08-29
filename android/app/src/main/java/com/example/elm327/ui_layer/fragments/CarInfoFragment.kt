@@ -16,6 +16,7 @@ import com.example.elm327.data_layer.SyncState
 import com.example.elm327.databinding.FragmentCarInfoBinding
 import com.example.elm327.ui_layer.util.TableConstructor
 import com.example.elm327.ui_layer.viewModels.CarInfoFragmentViewModel
+import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.value.Value
 import kotlinx.coroutines.launch
@@ -111,7 +112,7 @@ class CarInfoFragment : Fragment() {
 
     // table
 
-    private fun updateTable(pidValues: Map<ObdPids, List<Value>>) {
+    private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {
         context?.let { TableConstructor.update(binding.table, it, pidValues) }
     }
 }

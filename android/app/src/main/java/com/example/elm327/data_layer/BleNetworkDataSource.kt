@@ -2,6 +2,7 @@ package com.example.elm327.data_layer
 
 import android.location.Location
 import android.util.Log
+import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.value.Value
 import okhttp3.HttpUrl
@@ -21,9 +22,7 @@ class BleNetworkDataSource {
         fun updatePid(
             id: String,
             location: Location,
-            timestamp: Long,
-            pid: ObdPids,
-            values: List<Value>
+            decodedPidValue: DecodedPidValue
         ) {
             val httpUrl: HttpUrl = HttpUrl.Builder()
                 .scheme("https")
@@ -32,9 +31,10 @@ class BleNetworkDataSource {
                 .addQueryParameter("id", id)
                 .addQueryParameter("lat", location.latitude.toString())
                 .addQueryParameter("lon", location.longitude.toString())
-                .addQueryParameter("timestamp", timestamp.toString())
-                .addQueryParameter("pid", pid.pid)
-                .addQueryParameter("values", values.joinToString(" ") { it.toString() })
+                .addQueryParameter("timestamp", decodedPidValue.timestamp.toString())
+                .addQueryParameter("pid", decodedPidValue.pid.pid)
+                .addQueryParameter("values", decodedPidValue.valuesAsString())
+                .addQueryParameter("rawData", decodedPidValue.rawData)
                 .build()
 
             Log.i(LOG_TAG, httpUrl.toString())

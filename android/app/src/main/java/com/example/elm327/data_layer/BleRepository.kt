@@ -4,6 +4,7 @@ import android.location.Location
 import android.util.Log
 import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
+import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
 import com.example.elm327.util.value.Value
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,20 +64,16 @@ class BleRepositoryImp private constructor() : BleRepository {
         }
     }
 
-    fun updatePidValue(pid: ObdPids, values: List<Value>) {
+    fun updatePidValue(decodedPidValue: DecodedPidValue) {
         if (_uiState.value.carId != null && _uiState.value.location != null) {
             BleNetworkDataSource.updatePid(
                 _uiState.value.carId!!,
                 _uiState.value.location!!,
-                System.currentTimeMillis(),
-                pid,
-                values
+                decodedPidValue
             )
         }
         _uiState.update {
-            val newMap = it.pidValues.toMutableMap()
-            newMap[pid] = values
-            it.copy(pidValues = newMap)
+            it.copy(pidValues = mapOf(*it.pidValues.toList().toTypedArray(), Pair(decodedPidValue.pid, decodedPidValue)))
         }
     }
 
