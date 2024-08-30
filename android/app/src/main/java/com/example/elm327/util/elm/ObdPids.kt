@@ -176,7 +176,7 @@ enum class Decoders(val decode: (String) -> List<Value>) {
     RUN_TIME_MIN({ input -> listOf(Time.minutes(getAB(input))) }),
     DISTANCE({ input -> listOf(Distance.kiloMeters(getAB(input))) }),
 
-    SENSOR_VOLTAGE({ input -> listOf(Voltage.volts(getA(input) / 200), Ratio.percents((getB(input) * 100 / 128) - 100)) }),
+    SENSOR_VOLTAGE({ input -> listOf(Voltage.volts(getA(input) / 200), if (getB(input) == 255.0) RawData.raw("N/A") else Ratio.percents((getB(input) * 100 / 128) - 100)) }),
     OXYGEN_VOLTAGE({ input -> listOf(Ratio.ratio(getAB(input) / 32768), Voltage.volts(getCD(input) / 8192)) }),
     OXYGEN_SENSOR({ input -> listOf(Ratio.ratio(getAB(input) / 32768), ElectricCurrent.milliAmpere(getCD(input) / 256 - 128)) }),
     TWO_PERCENT_CENTERED({ input -> listOf(Ratio.percents((getA(input) * 100 / 128) - 100), Ratio.percents((getB(input) * 100 / 128) - 100)) }),
