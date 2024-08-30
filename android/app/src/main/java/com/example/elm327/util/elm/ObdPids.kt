@@ -1,9 +1,7 @@
 package com.example.elm327.util.elm
 
-import android.util.Log
 import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.value.*
-import java.sql.Timestamp
 
 enum class ObdPids(val pid: String, val descriptionShort: String, val descriptionLong: String, val decoder: Decoders) {
     NO_PID_FOUND("", "", "", Decoders.DEFAULT),
@@ -104,7 +102,14 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
     PID_5E("5E", "", "Engine fuel rate", Decoders.FUEL_RATE),
     PID_5F("5F", "", "Designed emission requirements", Decoders.DEFAULT),  // TODO UNKNOWN
     PID_60("60", "", "Supported PIDs [61-80]", Decoders.PIDS_61_80),
-
+    PID_61("61", "", "Driver's demand engine - percent torque", Decoders.PERCENT_ALT),
+    PID_62("62", "", "Actual engine - percent torque", Decoders.PERCENT_ALT),
+    PID_63("63", "", "Engine reference torque", Decoders.TORQUE),
+    PID_64("64", "", "Engine percent torque data", Decoders.PERCENT_ALT_MULTIPLE),
+    PID_65("65", "", "Auxiliary input / output supported", Decoders.DEFAULT),  // TODO UNKNOWN
+    PID_66("66", "", "Mass air flow sensor", Decoders.AIR_FLOW_RATE_MULTIPLE),
+    PID_67("67", "", "Engine coolant temperature", Decoders.TEMPERATURE_MULTIPLE),
+    PID_68("68", "", "Intake air temperature sensor", Decoders.TEMPERATURE_MULTIPLE),
     ;
 
     companion object {
@@ -137,12 +142,17 @@ fun getA(input: String) : Double { return input.slice(0..1).toUInt(radix = 16).t
 fun getB(input: String) : Double { return input.slice(2..3).toUInt(radix = 16).toDouble() }
 fun getC(input: String) : Double { return input.slice(4..5).toUInt(radix = 16).toDouble() }
 fun getD(input: String) : Double { return input.slice(6..7).toUInt(radix = 16).toDouble() }
+fun getE(input: String) : Double { return input.slice(8..9).toUInt(radix = 16).toDouble() }
 
 fun getAB(input: String) : Double { return input.slice(0..3).toUInt(radix = 16).toDouble() }
+fun getBC(input: String) : Double { return input.slice(2..5).toUInt(radix = 16).toDouble() }
 fun getCD(input: String) : Double { return input.slice(4..7).toUInt(radix = 16).toDouble() }
+fun getDE(input: String) : Double { return input.slice(6..9).toUInt(radix = 16).toDouble() }
 
 fun getSignedAB(input: String) : Double { return input.slice(0..3).toInt(radix = 16).toDouble() }
+fun getSignedBC(input: String) : Double { return input.slice(2..5).toInt(radix = 16).toDouble() }
 fun getSignedCD(input: String) : Double { return input.slice(4..7).toInt(radix = 16).toDouble() }
+fun getSignedDE(input: String) : Double { return input.slice(6..9).toInt(radix = 16).toDouble() }
 
 fun getBitsFirstByte(input: String) : List<Boolean> { return List(8) { i -> ((input.slice(0..1).toULong(radix = 16) shr i) and 1uL) != 0uL }.reversed() }
 fun getBitsFourBytes(input: String) : List<Boolean> { return List(32) { i -> ((input.slice(0..7).toULong(radix = 16) shr i) and 1uL) != 0uL }.reversed() }
@@ -154,10 +164,15 @@ enum class Decoders(val decode: (String) -> List<Value>) {
     AIR_FUEL_RATIO({ input -> listOf(Ratio.ratio(getAB(input) / 32768)) }),
     PERCENT({ input -> listOf(Ratio.percents(getA(input) * 100 / 255)) }),
     PERCENT_CENTERED({ input -> listOf(Ratio.percents((getA(input) * 100 / 128) - 100)) }),
+    PERCENT_ALT({ input -> listOf(Ratio.percents(getA(input) - 125)) }),
+    PERCENT_ALT_MULTIPLE({ input -> listOf(Ratio.percents(getA(input) - 125), Ratio.percents(getB(input) - 125),
+        Ratio.percents(getC(input) - 125), Ratio.percents(getD(input) - 125), Ratio.percents(getE(input) - 125)) }),
     ABSOLUTE_LOAD({ input -> listOf(Ratio.percents(getAB(input) * 100 / 255)) }),
-    SPEED({ input -> listOf(Speed.kiloMetersPerHour(getA(input))) }),
+    SPEED({ input -> listOf(Velocity.kiloMetersPerHour(getA(input))) }),
     MODULE_VOLTAGE({ input -> listOf(Voltage.volts(getAB(input) / 1000)) }),
     TEMPERATURE({ input -> listOf(Temperature.celsius(getA(input) - 40)) }),
+    TEMPERATURE_MULTIPLE({ input -> listOf(if (getBitsFirstByte(input)[7]) Temperature.celsius(getB(input) - 40) else RawData.raw("Not Supported"),
+                                                     if (getBitsFirstByte(input)[6]) Temperature.celsius(getC(input) - 40) else RawData.raw("Not Supported"),) }),
     SENSOR_TEMPERATURE({ input -> listOf(Temperature.celsius(getAB(input) / 10 - 40)) }),
     FUEL_PRESSURE({ input -> listOf(Pressure.kiloPascal(getA(input) * 3)) }),
     PRESSURE({ input -> listOf(Pressure.kiloPascal(getA(input))) }),
@@ -171,10 +186,13 @@ enum class Decoders(val decode: (String) -> List<Value>) {
     INJECT_TIMING({ input -> listOf(Ratio.ratio(getAB(input) / 128 - 210)) }),
     AIR_FLOW_RATE({ input -> listOf(MassFlow.gramsPerSecond(getAB(input) / 100)) }),
     AIR_FLOW_RATE_MAX({ input -> listOf(MassFlow.gramsPerSecond(getA(input) * 10)) }),
+    AIR_FLOW_RATE_MULTIPLE({ input -> listOf(if (getBitsFirstByte(input)[7]) MassFlow.gramsPerSecond(getBC(input) / 32) else RawData.raw("Not Supported"),
+                                                       if (getBitsFirstByte(input)[6]) MassFlow.gramsPerSecond(getDE(input) / 32) else RawData.raw("Not Supported"),) }),
     FUEL_RATE({ input -> listOf(VolumeFlow.litersPerSecond(getAB(input) / 20)) }),
     RUN_TIME_SEC({ input -> listOf(Time.seconds(getAB(input))) }),
     RUN_TIME_MIN({ input -> listOf(Time.minutes(getAB(input))) }),
     DISTANCE({ input -> listOf(Distance.kiloMeters(getAB(input))) }),
+    TORQUE({ input -> listOf(Torque.newtonMeters(getAB(input))) }),
 
     SENSOR_VOLTAGE({ input -> listOf(Voltage.volts(getA(input) / 200), if (getB(input) == 255.0) RawData.raw("N/A") else Ratio.percents((getB(input) * 100 / 128) - 100)) }),
     OXYGEN_VOLTAGE({ input -> listOf(Ratio.ratio(getAB(input) / 32768), Voltage.volts(getCD(input) / 8192)) }),

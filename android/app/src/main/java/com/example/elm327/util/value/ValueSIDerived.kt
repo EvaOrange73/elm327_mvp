@@ -1,24 +1,24 @@
 package com.example.elm327.util.value
 
-class Speed private constructor(private val speedSI: Double) : Value()
+class Velocity private constructor(private val velocitySI: Double) : Value()
 {
-    override val value: Double = speedSI
+    override val value: Double = velocitySI
 
     companion object
     {
-        fun metersPerSecond(speedMetersPerSecond: Double) : Speed
+        fun metersPerSecond(velocityMetersPerSecond: Double) : Velocity
         {
-            return Speed(speedMetersPerSecond)
+            return Velocity(velocityMetersPerSecond)
         }
 
-        fun kiloMetersPerHour(speedKiloMetersPerHour: Double) : Speed
+        fun kiloMetersPerHour(velocityKiloMetersPerHour: Double) : Velocity
         {
-            return Speed(speedKiloMetersPerHour / 3.6)
+            return Velocity(velocityKiloMetersPerHour / 3.6)
         }
 
-        fun milesPerHour(speedMilesMetersPerHour: Double) : Speed
+        fun milesPerHour(velocityMilesMetersPerHour: Double) : Velocity
         {
-            return Speed(speedMilesMetersPerHour / 2.2369)
+            return Velocity(velocityMilesMetersPerHour / 2.2369)
         }
     }
 
@@ -42,7 +42,7 @@ class Speed private constructor(private val speedSI: Double) : Value()
         return "${getKiloMetersPerHour()} km/h"
     }
 
-    fun printerKiloPascal() : String
+    fun printerMilesPerHour() : String
     {
         return "${getMilesPerHour()} mil/h"
     }
@@ -225,5 +225,38 @@ class VolumeFlow private constructor(private val flowSI: Double) : Value()
     fun printerGramsPerSecond() : String
     {
         return "${getLitersPerSecond()} L/s"
+    }
+}
+
+class Torque private constructor(private val torqueSI: Double) : Value()
+{
+    override val value: Double = torqueSI
+
+    companion object
+    {
+        fun newtonMeters(torqueNewtonMeters: Double) : Torque
+        {
+            return Torque(torqueNewtonMeters)
+        }
+
+        fun poundFoot(torquePoundFoot: Double) : Torque
+        {
+            return Torque(torquePoundFoot * 1.355817)
+        }
+    }
+
+    fun getPoundFoot() : Double
+    {
+        return value / 1.355817
+    }
+
+    override fun printerSI() : String
+    {
+        return "${getSI()} kg⋅m^2⋅s^−2"
+    }
+
+    fun printerPoundFoot() : String
+    {
+        return "${getPoundFoot()} lbf⋅ft"
     }
 }
