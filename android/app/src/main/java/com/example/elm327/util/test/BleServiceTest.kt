@@ -83,10 +83,10 @@ class BleServiceTest : Service() {
 
 
     suspend fun fakeScan() {
-        val devices = DeviceList()
+        var devices = DeviceList()
         fakeDeviceList.forEach {
             delay(1000)
-            devices.add(it)
+            devices = devices.copyAndAdd(it)
             bleRepository.updateDeviceList(devices)
         }
         bleRepository.updateScanState(ScanState.READY_TO_SCAN)

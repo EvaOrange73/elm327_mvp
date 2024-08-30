@@ -1,13 +1,11 @@
 package com.example.elm327.data_layer.model
 
 
-class DeviceList {
-    private val devices = mutableListOf(
-        Device(MacAddress.getDefault())
-    )
-
-    fun add(device: Device) {
-        devices.add(device)
+class DeviceList(
+    private val devices: List<Device> = listOf(Device(MacAddress.getDefault()))
+) {
+    fun copyAndAdd(device: Device): DeviceList {
+        return DeviceList(listOf(*this.devices.toTypedArray(), device))
     }
 
     fun findDeviceByMacAddress(requiredAddress: MacAddress): Device? {

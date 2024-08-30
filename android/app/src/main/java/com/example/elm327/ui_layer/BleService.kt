@@ -41,7 +41,7 @@ class BleService : Service() {
         ElmManager(applicationContext)
     }
 
-    private val devices: DeviceList = DeviceList()
+    private var devices: DeviceList = DeviceList()
     private var selectedMacAddress = MacAddress.getDefault()
 
 
@@ -98,7 +98,7 @@ class BleService : Service() {
             } else {
                 val curAddress: MacAddress = MacAddress(result.device.address)
                 if (devices.findDeviceByMacAddress(curAddress) == null) {
-                    devices.add(Device(curAddress)) //TODO сохранять имя
+                    devices = devices.copyAndAdd(Device(curAddress)) //TODO сохранять имя
                     bleRepository.updateDeviceList(devices)
                 }
             }
