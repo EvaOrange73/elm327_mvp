@@ -10,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.example.elm327.R
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.SyncState
@@ -18,7 +19,6 @@ import com.example.elm327.ui_layer.util.TableConstructor
 import com.example.elm327.ui_layer.viewModels.CarInfoFragmentViewModel
 import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
-import com.example.elm327.util.value.Value
 import kotlinx.coroutines.launch
 
 class CarInfoFragment : Fragment() {
@@ -45,7 +45,7 @@ class CarInfoFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect {
                     updateCarId(viewModel.uiState.value.carId)
-                    updatesyncButton(viewModel.uiState.value.syncButtonState)
+                    updateSyncButton(viewModel.uiState.value.syncButtonState)
                     updateTable(viewModel.uiState.value.pidValues)
                 }
             }
@@ -61,6 +61,7 @@ class CarInfoFragment : Fragment() {
         val root: View = binding.root
 
         binding.syncButton.setOnClickListener { syncButtonOnClick() }
+        binding.moreButton.setOnClickListener { navigateToMoreInfo() }
         context?.let { TableConstructor.create(binding.table, it) }
 
         return root
@@ -83,7 +84,7 @@ class CarInfoFragment : Fragment() {
 
     // syncButton
 
-    private fun updatesyncButton(syncState: SyncState){
+    private fun updateSyncButton(syncState: SyncState){
         val syncButton = binding.syncButton
         when (syncState){
             SyncState.NO_PERMISSIONS -> {
@@ -109,7 +110,10 @@ class CarInfoFragment : Fragment() {
         }
     }
 
-
+    private fun navigateToMoreInfo() {
+        val navController = findNavController()
+        navController.navigate(R.id.action_nav_gallery_to_nav_slideshow)
+    }
     // table
 
     private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {

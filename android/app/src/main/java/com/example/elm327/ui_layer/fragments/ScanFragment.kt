@@ -15,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.example.elm327.R
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
@@ -178,6 +179,7 @@ class ScanFragment : Fragment() {
                 if (showConnectedMessage) {
                     Toast.makeText(context, getString(R.string.success), Toast.LENGTH_SHORT).show()
                     showConnectedMessage = false
+                    findNavController().navigate(R.id.action_nav_home_to_nav_gallery)
                 }
                 connectionButton.setBackgroundColor(Color.GRAY)
                 connectionButton.text = getString(R.string.disconnect)
