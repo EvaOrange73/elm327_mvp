@@ -143,7 +143,7 @@ class ScanFragment : Fragment() {
                 val item = parent.getItemAtPosition(position) as String
                 val binder = (activity as MainActivity).bleBinder
                 (activity as MainActivity).writeToPreference(MacAddress.preferenceKey, item)
-                binder?.selectMacAddress?.let { it(MacAddress(item)) }
+                binder?.selectMacAddress(MacAddress(item))
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -179,7 +179,7 @@ class ScanFragment : Fragment() {
                 if (showConnectedMessage) {
                     Toast.makeText(context, getString(R.string.success), Toast.LENGTH_SHORT).show()
                     showConnectedMessage = false
-                    findNavController().navigate(R.id.action_nav_home_to_nav_gallery)
+                    findNavController().navigate(R.id.action_nav_scan_to_nav_car_info)
                 }
                 connectionButton.setBackgroundColor(Color.GRAY)
                 connectionButton.text = getString(R.string.disconnect)

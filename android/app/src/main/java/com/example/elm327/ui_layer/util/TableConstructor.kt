@@ -23,11 +23,16 @@ class TableConstructor {
             )
 
             table.addView(
-                createRow(context, weights.sum(), header.zip(weights).toMap())
+                createRow(context, weights.sum(), header.zip(weights).toMap(), null)
             )
         }
 
-        fun update(table: TableLayout, context: Context, pidValues: Map<ObdPids, DecodedPidValue>) {
+        fun update(
+            table: TableLayout,
+            context: Context,
+            pidValues: Map<ObdPids, DecodedPidValue>,
+            onclickCallback: ((ObdPids) -> Unit)
+        ) {
             table.removeViews(1, (table.childCount - 1).coerceAtLeast(0))
             pidValues.forEach { (pid, value) ->
                 table.addView(
@@ -37,7 +42,7 @@ class TableConstructor {
                         listOf(
                             pid.pid, pid.descriptionLong, value.valuesAsString()
                         ).zip(weights).toMap()
-                    )
+                    ) { onclickCallback(pid) }
                 )
             }
 
@@ -46,7 +51,8 @@ class TableConstructor {
         private fun createRow(
             context: Context,
             weightSum: Float,
-            cells: Map<String, Float>
+            cells: Map<String, Float>,
+            onclickCallback: (() -> Unit)?,
         ): TableRow {
             val row = TableRow(context)
             row.layoutParams = TableRow.LayoutParams(
@@ -56,13 +62,18 @@ class TableConstructor {
             row.weightSum = weightSum
 
             cells.forEach { (text, weight) ->
-                row.addView(createTextView(context, text, weight))
+                row.addView(createTextView(context, text, weight, onclickCallback))
             }
 
             return row
         }
 
-        private fun createTextView(context: Context, text: String, weight: Float): TextView {
+        private fun createTextView(
+            context: Context,
+            text: String,
+            weight: Float,
+            onclickCallback: (() -> Unit)?,
+        ): TextView {
             val textView = TextView(context)
             textView.text = text
             textView.layoutParams = TableRow.LayoutParams(
@@ -72,6 +83,7 @@ class TableConstructor {
             )
             textView.setBackgroundResource(R.drawable.border)
             textView.setPadding(10)
+            if (onclickCallback != null) textView.setOnClickListener { onclickCallback() }
             return textView
         }
     }
