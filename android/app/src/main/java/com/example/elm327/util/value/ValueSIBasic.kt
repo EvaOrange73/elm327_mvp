@@ -96,6 +96,69 @@ class Distance private constructor(private val distanceSI: Double) : Value()
     }
 }
 
+class Mass private constructor(private val massSI: Double) : Value()
+{
+    override val value: Double = massSI
+
+    companion object
+    {
+        fun kiloGrams(massKiloGrams: Double) : Mass
+        {
+            return Mass(massKiloGrams)
+        }
+
+        fun grams(massGrams: Double) : Mass
+        {
+            return Mass(massGrams / 1000)
+        }
+
+        fun tonnes(massTonnes: Double) : Mass
+        {
+            return Mass(massTonnes * 1000)
+        }
+
+        fun pounds(massPounds: Double) : Mass
+        {
+            return Mass(massPounds * 0.4536)
+        }
+    }
+
+    fun getGrams() : Double
+    {
+        return value * 1000
+    }
+
+    fun getTonnes() : Double
+    {
+        return value / 1000
+    }
+
+    fun getPounds() : Double
+    {
+        return value / 0.4536
+    }
+
+    override fun printerSI() : String
+    {
+        return "${getSI()} kg"
+    }
+
+    fun printerGrams() : String
+    {
+        return "${getGrams()} g"
+    }
+
+    fun printerTonnes() : String
+    {
+        return "${getTonnes()} t"
+    }
+
+    fun printerPounds() : String
+    {
+        return "${getPounds()} lb"
+    }
+}
+
 class Temperature private constructor(private val temperatureSI: Double) : Value()
 {
     override val value: Double = temperatureSI

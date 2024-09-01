@@ -9,13 +9,21 @@
         android:id="@+id/nav_home"
         android:name="com.example.elm327.ui_layer.fragments.ScanFragment"
         android:label="@string/menu_scan"
-        tools:layout="@layout/fragment_scan" />
+        tools:layout="@layout/fragment_scan" >
+        <action
+            android:id="@+id/action_nav_home_to_nav_gallery"
+            app:destination="@id/nav_gallery" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_gallery"
         android:name="com.example.elm327.ui_layer.fragments.CarInfoFragment"
         android:label="@string/menu_car_info"
-        tools:layout="@layout/fragment_car_info" />
+        tools:layout="@layout/fragment_car_info" >
+        <action
+            android:id="@+id/action_nav_gallery_to_nav_slideshow"
+            app:destination="@id/nav_slideshow" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_slideshow"
