@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
     private fun bindBleService() {
         if (!bound && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
             val bleServiceIntent = Intent(this, BleService::class.java)
-            startService(bleServiceIntent)
+            startForegroundService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                     bleBinder = binder as BleService.BleBinder

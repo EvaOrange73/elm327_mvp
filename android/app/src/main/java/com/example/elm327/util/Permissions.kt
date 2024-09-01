@@ -3,7 +3,10 @@ package com.example.elm327.util
 import android.Manifest
 import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -15,15 +18,28 @@ class Permissions(private val mainActivity: MainActivity) {
     private var curPermission: String? = null
     private val REQUEST_PERMISSION_BLE: Int = 1
 
-    fun showPermissionsState(
-        permissionsToCheck: List<String> = listOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-            Manifest.permission.INTERNET,
-    )) {
+    companion object
+    {
+        val permissionsToCheck: List<String> = listOf(
+                                Manifest.permission.BLUETOOTH,
+                                Manifest.permission.BLUETOOTH_ADMIN,
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                                Manifest.permission.INTERNET,
+                                                     )
+
+        val foregroundPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                                            {
+                                                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                                            }
+                                            else
+                                            {
+                                                0
+                                            }
+    }
+
+    fun showPermissionsState() {
         for (permission in permissionsToCheck) {
             curPermission = permission
             showCurPermissionState()

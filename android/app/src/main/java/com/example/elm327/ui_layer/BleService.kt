@@ -2,6 +2,8 @@ package com.example.elm327.ui_layer
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.BluetoothLeScanner
@@ -9,26 +11,40 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Binder
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
+import com.example.elm327.data_layer.BleNetworkDataSource
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
 import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.Device
 import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
+import com.example.elm327.util.DecodedPidValue
+import com.example.elm327.util.Permissions
 import com.example.elm327.util.elm.ElmManager
 import com.example.elm327.util.elm.ObdPids
+import com.example.elm327.util.value.RawData
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 class BleService : Service() {
     private val LOG_TAG = "BleService"
+    private val NOTIFICATION_NAME = "ELM327"
+    private val NOTIFICATION_ID = 52
 
     private val bluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     private val bluetoothLeScanner: BluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
@@ -90,10 +106,28 @@ class BleService : Service() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(LOG_TAG, "started")
         bleRepository.updateScanState(ScanState.READY_TO_SCAN)
         bleRepository.updateConnectionState(ConnectionState.READY_TO_CONNECT)
+        val channel = NotificationChannel(NOTIFICATION_NAME, NOTIFICATION_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_NAME).build()
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, Permissions.foregroundPermissions)
+//        GlobalScope.launch(Dispatchers.IO) {
+//            while (true) {
+//                launch(Dispatchers.IO) {
+//                    Log.i(LOG_TAG, "hui")
+//                    if (bleRepository.uiState.value.location != null)
+//                    {
+//                        BleNetworkDataSource.updatePid("1", bleRepository.uiState.value.location!!, DecodedPidValue(System.currentTimeMillis(), "0", ObdPids.PID_01, listOf(RawData.raw("0"))))
+//                    }
+//                }
+//                delay(1000)
+//            }
+//            Log.i(LOG_TAG, "End of the loop for the service")
+//        }
         return super.onStartCommand(intent, flags, startId)
     }
 
