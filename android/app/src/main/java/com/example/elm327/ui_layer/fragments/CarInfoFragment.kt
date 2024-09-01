@@ -112,11 +112,11 @@ class CarInfoFragment : Fragment() {
 
     private fun navigateToMoreInfo() {
         val navController = findNavController()
-        navController.navigate(R.id.action_nav_gallery_to_nav_slideshow)
+        navController.navigate(R.id.action_nav_car_info_to_nav_more_info)
     }
     // table
 
     private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {
-        context?.let { TableConstructor.update(binding.table, it, pidValues) }
+//        context?.let { TableConstructor.update(binding.table, it, pidValues) }
     }
 }

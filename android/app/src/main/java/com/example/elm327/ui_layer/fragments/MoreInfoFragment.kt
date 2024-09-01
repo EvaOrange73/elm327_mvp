@@ -9,6 +9,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.example.elm327.R
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.databinding.FragmentMoreInfoBinding
 import com.example.elm327.ui_layer.util.TableConstructor
@@ -67,6 +69,15 @@ class MoreInfoFragment : Fragment() {
     }
 
     private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {
-        context?.let { TableConstructor.update(binding.table, it, pidValues) }
+        context?.let {
+            TableConstructor.update(binding.table, it, pidValues, navigateToSinglePidFragment)
+        }
+    }
+
+    private val navigateToSinglePidFragment: ((ObdPids) -> Unit) = { pid ->
+        val bundle = Bundle()
+        bundle.putString("pid", pid.pid)
+        val navController = findNavController()
+        navController.navigate(R.id.action_nav_more_info_to_nav_single_pid, bundle)
     }
 }
