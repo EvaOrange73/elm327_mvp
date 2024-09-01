@@ -142,7 +142,7 @@ class ScanFragment : Fragment() {
                 val item = parent.getItemAtPosition(position) as String
                 val binder = (activity as MainActivity).bleBinder
                 (activity as MainActivity).writeToPreference(MacAddress.preferenceKey, item)
-                binder?.selectMacAddress(MacAddress(item))
+                binder?.selectMacAddress?.let { it(MacAddress(item)) }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {

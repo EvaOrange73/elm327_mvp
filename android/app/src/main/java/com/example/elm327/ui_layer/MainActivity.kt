@@ -29,7 +29,6 @@ import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
-import com.example.elm327.util.test.BleServiceTest
 import com.google.android.material.navigation.NavigationView
 
 
@@ -54,8 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     var bound = false
 
-    //    lateinit var bleBinder : BleService.BleBinder
-    var bleBinder: BleServiceTest.BleBinderTest? = null
+    var bleBinder: BleService.BleBinder? = null
         get() = field.also { bindBleService() }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -108,13 +106,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun bindBleService() {
         if (!bound && bluetoothAdapter.isEnabled && locationManager.isLocationEnabled) {
-//            val bleServiceIntent = Intent(this, BleService::class.java)
-            val bleServiceIntent = Intent(this, BleServiceTest::class.java)
+            val bleServiceIntent = Intent(this, BleService::class.java)
             startService(bleServiceIntent)
             val serviceConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-//                    bleBinder = binder as BleService.BleBinder
-                    bleBinder = binder as BleServiceTest.BleBinderTest
+                    bleBinder = binder as BleService.BleBinder
                     bound = true
                 }
 

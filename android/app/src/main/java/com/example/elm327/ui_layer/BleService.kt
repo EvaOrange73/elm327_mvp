@@ -23,6 +23,9 @@ import com.example.elm327.data_layer.model.Device
 import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.util.elm.ElmManager
+import com.example.elm327.util.elm.ObdPids
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 class BleService : Service() {
     private val LOG_TAG = "BleService"
@@ -67,18 +70,28 @@ class BleService : Service() {
         }
 
         val connect: (() -> Unit) = {
+            Log.i(LOG_TAG, "connect")
             bleRepository.updateConnectionState(ConnectionState.CONNECTING)
             val device = bluetoothAdapter.getRemoteDevice(selectedMacAddress.toString())
             elmManager.connect(device).useAutoConnect(true).enqueue()
+            GlobalScope.async { elmManager.startRead() }
+        }
+
+        val selectPid: ((ObdPids) -> Unit) = { pid ->
+            elmManager.selectedPid = pid
+        }
+
+        val selectAll: (() -> Unit) = {
+            elmManager.selectedPid = null
         }
 
         val disconnect: (() -> Unit) = {
-            // TODO
+            elmManager.stopRead()
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i("Ble Service", "started")
+        Log.i(LOG_TAG, "started")
         bleRepository.updateScanState(ScanState.READY_TO_SCAN)
         bleRepository.updateConnectionState(ConnectionState.READY_TO_CONNECT)
         return super.onStartCommand(intent, flags, startId)
