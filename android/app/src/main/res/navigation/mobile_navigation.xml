@@ -3,30 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_scan">
+    app:startDestination="@+id/nav_home">
 
     <fragment
-        android:id="@+id/nav_scan"
+        android:id="@+id/nav_home"
         android:name="com.example.elm327.ui_layer.fragments.ScanFragment"
         android:label="@string/menu_scan"
         tools:layout="@layout/fragment_scan" >
         <action
-            android:id="@+id/action_nav_scan_to_nav_car_info"
-            app:destination="@id/nav_car_info" />
+            android:id="@+id/action_nav_home_to_nav_gallery"
+            app:destination="@id/nav_gallery" />
     </fragment>
 
     <fragment
-        android:id="@+id/nav_car_info"
+        android:id="@+id/nav_gallery"
         android:name="com.example.elm327.ui_layer.fragments.CarInfoFragment"
         android:label="@string/menu_car_info"
         tools:layout="@layout/fragment_car_info" >
         <action
-            android:id="@+id/action_nav_car_info_to_nav_more_info"
-            app:destination="@id/nav_more_info" />
+            android:id="@+id/action_nav_gallery_to_nav_slideshow"
+            app:destination="@id/nav_slideshow" />
     </fragment>
 
     <fragment
-        android:id="@+id/nav_more_info"
+        android:id="@+id/nav_slideshow"
         android:name="com.example.elm327.ui_layer.fragments.MoreInfoFragment"
         android:label="@string/menu_history"
         tools:layout="@layout/fragment_more_info">

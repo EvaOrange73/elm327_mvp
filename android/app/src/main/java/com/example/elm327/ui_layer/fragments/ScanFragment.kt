@@ -185,7 +185,7 @@ class ScanFragment : Fragment() {
                 if (showConnectedMessage) {
                     Toast.makeText(context, getString(R.string.success), Toast.LENGTH_SHORT).show()
                     showConnectedMessage = false
-                    findNavController().navigate(R.id.action_nav_scan_to_nav_car_info)
+                    findNavController().navigate(R.id.action_nav_home_to_nav_gallery)
                 }
                 connectionButton.setBackgroundColor(Color.GRAY)
                 connectionButton.text = getString(R.string.disconnect)

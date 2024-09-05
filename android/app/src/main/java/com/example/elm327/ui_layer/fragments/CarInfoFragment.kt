@@ -84,17 +84,19 @@ class CarInfoFragment : Fragment() {
 
     // syncButton
 
-    private fun updateSyncButton(syncState: SyncState){
+    private fun updateSyncButton(syncState: SyncState) {
         val syncButton = binding.syncButton
-        when (syncState){
+        when (syncState) {
             SyncState.NO_PERMISSIONS -> {
                 syncButton.text = getString(R.string.no_internet_permissions)
                 syncButton.setBackgroundColor(Color.RED)
             }
+
             SyncState.SYNCHRONIZED -> {
                 syncButton.text = getString(R.string.sync)
                 syncButton.setBackgroundColor(Color.GRAY)
             }
+
             SyncState.NOT_SYNCHRONIZED -> {
                 syncButton.text = getString(R.string.not_sync)
                 syncButton.setBackgroundColor(Color.GREEN)
@@ -112,11 +114,12 @@ class CarInfoFragment : Fragment() {
 
     private fun navigateToMoreInfo() {
         val navController = findNavController()
-        navController.navigate(R.id.action_nav_car_info_to_nav_more_info)
+        navController.navigate(R.id.action_nav_gallery_to_nav_slideshow)
     }
+
     // table
 
     private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {
-//        context?.let { TableConstructor.update(binding.table, it, pidValues) }
+        context?.let { TableConstructor.update(binding.table, it, pidValues) {} }
     }
 }

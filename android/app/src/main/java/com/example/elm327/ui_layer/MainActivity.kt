@@ -33,7 +33,7 @@ import com.example.elm327.util.Permissions
 import com.example.elm327.util.test.BleServiceTest
 import com.google.android.material.navigation.NavigationView
 
-val GLOBAL_IS_TEST: Boolean = false
+val GLOBAL_IS_TEST: Boolean = true
 @RequiresApi(Build.VERSION_CODES.P)
 class MainActivity : AppCompatActivity() {
     private val LOG_TAG = "MainActivity"
