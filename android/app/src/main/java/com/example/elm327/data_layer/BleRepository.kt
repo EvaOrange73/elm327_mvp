@@ -73,7 +73,7 @@ class BleRepositoryImp private constructor() : BleRepository {
             )
         }
         _uiState.update {
-            it.copy(pidValues = mapOf(*it.pidValues.toList().toTypedArray(), Pair(decodedPidValue.pid, decodedPidValue)))
+            it.copy(pidValues = sortedMapOf(*it.pidValues.toList().toTypedArray(), Pair(decodedPidValue.pid, decodedPidValue)))
         }
     }
 

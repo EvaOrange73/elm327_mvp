@@ -5,7 +5,7 @@ import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
-import com.example.elm327.util.value.Value
+import java.util.SortedMap
 
 enum class ScanState {
     NO_PERMISSIONS,
@@ -36,7 +36,7 @@ data class BleState(
 
     val syncState: SyncState = SyncState.NOT_SYNCHRONIZED, // TODO: check permissions
     val carId: String? = null,
-    val pidValues: Map<ObdPids, DecodedPidValue> = mapOf(),
+    val pidValues: SortedMap<ObdPids, DecodedPidValue> = sortedMapOf(comparator = compareBy<ObdPids> { it.pid }),
 
     val location: Location? = null,
 )

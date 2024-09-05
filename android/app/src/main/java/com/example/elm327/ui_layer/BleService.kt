@@ -40,7 +40,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 class BleService : Service() {
     private val LOG_TAG = "BleService"
     private val NOTIFICATION_NAME = "ELM327"
@@ -102,6 +101,7 @@ class BleService : Service() {
         }
 
         val disconnect: (() -> Unit) = {
+            bleRepository.updateConnectionState(ConnectionState.FAIL)
             elmManager.stopRead()
         }
     }

@@ -209,12 +209,12 @@ enum class Decoders(val decode: (String) -> List<Value>) {
         getBitsFourBytes(input).slice(16..23).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 1)) } +
         getBitsFourBytes(input).slice(24..31).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 1)) }
                    }),
-    DTC_TRIGGERED({ input -> listOf(Ratio.ratio(getA(input)), Voltage.volts(getB(input)), ElectricCurrent.milliAmpere(getC(input)), Pressure.kiloPascal(getD(input) * 10)) }),
-    SENSORS_1_8({ input -> listOf(RawData.raw(if (!getBitsFirstByte(input)[0] && !getBitsFirstByte(input)[1]) "P "        // 00
+    DTC_TRIGGERED({ input -> listOf(RawData.raw(if (!getBitsFirstByte(input)[0] && !getBitsFirstByte(input)[1]) "P "        // 00
                                                         else if (!getBitsFirstByte(input)[0] && getBitsFirstByte(input)[1]) "C "    // 01
                                                         else if (getBitsFirstByte(input)[0] && !getBitsFirstByte(input)[1]) "B "    // 10
                                                         else "U " +                                                                 // 11
                                                         Integer.toHexString((getA(input).toUInt() % 64u).toInt()) + ' ' + Integer.toHexString(getB(input).toInt()))) }),
+    SENSORS_1_8({ input -> getBitsFirstByte(input).reversed().mapIndexed { index, it -> Bool.boolIndexed(it, (index + 1).toString()) } }),
     SENSORS_1_8_ALT({ input -> getBitsFirstByte(input).reversed().mapIndexed { index, it -> Bool.boolIndexed(it, (index + 1).toString()) } }),
 
     FUEL_TYPE({ input -> listOf(FuelType.fromULong(getA(input).toULong())) }),

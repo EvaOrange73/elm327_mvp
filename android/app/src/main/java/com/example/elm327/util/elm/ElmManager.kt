@@ -10,6 +10,7 @@ import com.example.elm327.data_layer.ConnectionState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.data.Data
 import java.sql.Timestamp
@@ -29,8 +30,8 @@ class ElmManager(context: Context) : BleManager(context) {
     private val WRITE_UUID =
         UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb")  // TODO correct uuid init
 
-    private val initCommands = listOf("ATZ", "ATD", "ATH1", "ATS1", "ATSP6") // синий
-    // TODO красный
+    private val initCommands = listOf("ATZ", "ATD", "ATH1", "ATS0", "ATSP6") // синий
+    // TODO красный и ATZ с делеем
 
     // ==== Required implementation ====
     private var readCharacteristic: BluetoothGattCharacteristic? = null
@@ -48,9 +49,14 @@ class ElmManager(context: Context) : BleManager(context) {
     override fun initialize() {
         setNotificationCallback(readCharacteristic).with { bluetoothDevice: BluetoothDevice, data: Data ->
             val value = data.getStringValue(0)!!
-            Log.i(OUR_TAG, value)
-            Log.i(OUR_TAG, ObdPids.parse(value, System.currentTimeMillis()).valuesAsString())
-            bleRepository.updatePidValue(ObdPids.parse(value, System.currentTimeMillis()))
+            if (value.contains('>')) initialized = true
+            //Log.i(OUR_TAG, value)
+            val decodedValue = ObdPids.parse(value, System.currentTimeMillis())
+            if (decodedValue.pid != ObdPids.NO_PID_FOUND)
+            {
+                //Log.i(OUR_TAG, "${decodedValue.pid} -- ${decodedValue.valuesAsString()}")
+                bleRepository.updatePidValue(ObdPids.parse(value, System.currentTimeMillis()))
+            }
         }
         beginAtomicRequestQueue().add(enableNotifications(readCharacteristic)
             .fail { _: BluetoothDevice, status: Int ->
@@ -61,13 +67,16 @@ class ElmManager(context: Context) : BleManager(context) {
             .enqueue()
         //enableNotifications(fluxCapacitorControlPoint).enqueue()
 
-        initCommands.forEach {
-            writeCharacteristic(
-                writeCharacteristic,
-                Data.from(it + "\r"),
-                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-            ).enqueue()
+        GlobalScope.launch {
+            initCommands.forEach {
+                writeCharacteristic(
+                    writeCharacteristic,
+                    Data.from(it + "\r"),
+                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE).await()
+                delay(1000)
+            }
         }
+
 
         bleRepository.updateConnectionState(ConnectionState.CONNECTED)
     }
@@ -89,17 +98,18 @@ class ElmManager(context: Context) : BleManager(context) {
 
     // ==== Public API ====
     private suspend fun readPid(pid: ObdPids) {
+        if (!initialized) return
         if (continueReading) {
             writeCharacteristic(
                 writeCharacteristic,
                 Data.from("01" + pid.pid + '\r'),
                 BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
             ).enqueue()
-            Log.i(OUR_TAG, "start read ${pid.pid}")
-            delay(1000)
+            //Log.i(OUR_TAG, "read ${pid.pid}")
+            delay(500)
         }
     }
-
+    var initialized = false
     var selectedPid: ObdPids? = null
     var continueReading = false
 

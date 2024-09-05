@@ -23,8 +23,11 @@ import com.example.elm327.data_layer.ScanState
 import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.databinding.FragmentScanBinding
+import com.example.elm327.ui_layer.BleService
+import com.example.elm327.ui_layer.GLOBAL_IS_TEST
 import com.example.elm327.ui_layer.MainActivity
 import com.example.elm327.ui_layer.viewModels.ScanFragmentViewModel
+import com.example.elm327.util.test.BleServiceTest
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.P)
@@ -107,12 +110,12 @@ class ScanFragment : Fragment() {
     }
 
     private fun scanButtonOnClick() {
-        val binder = (activity as MainActivity).bleBinder
+        val binder  = (activity as MainActivity).bleBinder
         if (binder != null) {
             when (viewModel.uiState.value.scanState) {
                 ScanState.NO_PERMISSIONS -> TODO()
-                ScanState.READY_TO_SCAN -> binder.startScan()
-                ScanState.SCANNING -> binder.stopScan()
+                ScanState.READY_TO_SCAN -> if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).startScan() else (binder as BleService.BleBinder).startScan()
+                ScanState.SCANNING -> if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).stopScan() else (binder as BleService.BleBinder).stopScan()
             }
         }
     }
@@ -143,7 +146,10 @@ class ScanFragment : Fragment() {
                 val item = parent.getItemAtPosition(position) as String
                 val binder = (activity as MainActivity).bleBinder
                 (activity as MainActivity).writeToPreference(MacAddress.preferenceKey, item)
-                binder?.selectMacAddress(MacAddress(item))
+                if (binder != null)
+                {
+                    if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).selectMacAddress(MacAddress(item)) else (binder as BleService.BleBinder).selectMacAddress(MacAddress(item))
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -201,10 +207,10 @@ class ScanFragment : Fragment() {
         if (binder != null) {
             when (viewModel.uiState.value.connectionState) {
                 ConnectionState.NO_PERMISSIONS -> TODO()
-                ConnectionState.READY_TO_CONNECT -> binder.connect()
-                ConnectionState.CONNECTING -> binder.disconnect()
-                ConnectionState.CONNECTED -> binder.disconnect()
-                ConnectionState.FAIL -> binder.connect()
+                ConnectionState.READY_TO_CONNECT -> if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).connect() else (binder as BleService.BleBinder).connect()
+                ConnectionState.CONNECTING -> if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).disconnect() else (binder as BleService.BleBinder).disconnect()
+                ConnectionState.CONNECTED -> if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).disconnect() else (binder as BleService.BleBinder).disconnect()
+                ConnectionState.FAIL -> if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).connect() else (binder as BleService.BleBinder).connect()
             }
         }
     }
