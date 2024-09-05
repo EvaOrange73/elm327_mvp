@@ -8,9 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
@@ -143,6 +145,7 @@ class ScanFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
+                (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(com.google.android.material.R.color.design_default_color_on_primary, activity!!.theme))
                 val item = parent.getItemAtPosition(position) as String
                 val binder = (activity as MainActivity).bleBinder
                 (activity as MainActivity).writeToPreference(MacAddress.preferenceKey, item)
