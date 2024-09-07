@@ -63,7 +63,7 @@ class CarInfoFragment : Fragment() {
 
         binding.syncButton.setOnClickListener { syncButtonOnClick() }
         binding.moreButton.setOnClickListener { navigateToMoreInfo() }
-        context?.let { TableConstructor.create(binding.table, it) }
+        updateTableHeader()
 
         return root
     }
@@ -119,15 +119,38 @@ class CarInfoFragment : Fragment() {
     }
 
     // available pids
-    private fun updateAvailablePids(pidGetters : Map<ObdPids, DecodedPidValue>){
+    private fun updateAvailablePids(pidGetters: Map<ObdPids, DecodedPidValue>) {
         val textView = binding.availablePids
         var availablePids = ""
         pidGetters.forEach { (key, value) -> availablePids += value.valuesAsPidGetter() }
         textView.text = availablePids
     }
+
     // table
 
+    private val valueOnClickCallback = {
+        bleRepository.setNextUnitOfMeasurement()
+        updateTableHeader()
+        updateTable(viewModel.uiState.value.pidValues)
+    }
+
+    private fun updateTableHeader(){
+        binding.table.removeAllViews()
+        context?.let {
+            TableConstructor.create(binding.table,
+                it, viewModel.uiState.value.unitOfMeasurement, valueOnClickCallback)
+        }
+    }
+
     private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {
-        context?.let { TableConstructor.update(binding.table, it, pidValues) {} }
+        context?.let {
+            TableConstructor.update(
+                binding.table,
+                it,
+                pidValues,
+                viewModel.uiState.value.unitOfMeasurement,
+                valueOnClickCallback
+            ) {}
+        }
     }
 }

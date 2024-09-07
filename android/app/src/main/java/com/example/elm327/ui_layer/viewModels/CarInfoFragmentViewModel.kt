@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.elm327.data_layer.BleRepository
 import com.example.elm327.data_layer.SyncState
+import com.example.elm327.data_layer.UnitOfMeasurement
 import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ data class CarInfoFragmentViewState(
     val syncButtonState: SyncState = SyncState.NO_PERMISSIONS,
     val pidGetters: Map<ObdPids, DecodedPidValue> = mapOf(),
     val pidValues: Map<ObdPids, DecodedPidValue> = mapOf(),
+    val unitOfMeasurement: UnitOfMeasurement = UnitOfMeasurement.METRIC_OPTIMAL,
 )
 
 class CarInfoFragmentViewModel(private val bleRepository: BleRepository) : ViewModel() {
@@ -49,7 +51,8 @@ class CarInfoFragmentViewModel(private val bleRepository: BleRepository) : ViewM
                         bleState.pidValues.filter {
                             it.key == ObdPids.PID_0C ||
                                     it.key == ObdPids.PID_0B //TODO: выбрать
-                        }
+                        },
+                        bleState.unitOfMeasurement,
                     )
                 }
             }

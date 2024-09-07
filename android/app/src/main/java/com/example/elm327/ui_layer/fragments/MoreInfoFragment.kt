@@ -57,8 +57,7 @@ class MoreInfoFragment : Fragment() {
         _binding = FragmentMoreInfoBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        context?.let { TableConstructor.create(binding.table, it) }
-
+        updateTableHeader()
 
         return root
     }
@@ -68,9 +67,23 @@ class MoreInfoFragment : Fragment() {
         _binding = null
     }
 
+    private val valueOnClickCallback = {
+        bleRepository.setNextUnitOfMeasurement()
+        updateTableHeader()
+        updateTable(viewModel.uiState.value.pidValues)
+    }
+
+    private fun updateTableHeader(){
+        binding.table.removeAllViews()
+        context?.let {
+            TableConstructor.create(binding.table,
+                it, viewModel.uiState.value.unitOfMeasurement, valueOnClickCallback)
+        }
+    }
+
     private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {
         context?.let {
-            TableConstructor.update(binding.table, it, pidValues, navigateToSinglePidFragment)
+            TableConstructor.update(binding.table, it, pidValues, viewModel.uiState.value.unitOfMeasurement, valueOnClickCallback, navigateToSinglePidFragment)
         }
     }
 

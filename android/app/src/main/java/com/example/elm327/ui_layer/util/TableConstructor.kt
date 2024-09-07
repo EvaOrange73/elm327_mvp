@@ -4,26 +4,25 @@ import android.content.Context
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
-import androidx.core.view.marginTop
 import androidx.core.view.setPadding
 import com.example.elm327.R
+import com.example.elm327.data_layer.UnitOfMeasurement
 import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
-import com.example.elm327.util.value.Value
 
 class TableConstructor {
     companion object {
         private val weights = listOf(3F, 5F, 5F)
 
-        fun create(table: TableLayout, context: Context) {
+        fun create(table: TableLayout, context: Context, unitOfMeasurement: UnitOfMeasurement, headerOnclickCallback: (() -> Unit)) {
             val header: List<String> = listOf(
                 context.resources.getString(R.string.table_pid),
                 context.resources.getString(R.string.table_description),
-                context.resources.getString(R.string.table_value),
+                "${context.resources.getString(R.string.table_value)} (${unitOfMeasurement.label})",
             )
 
             table.addView(
-                createRow(context, weights.sum(), header.zip(weights).toMap(), null)
+                createRow(context, weights.sum(), header.zip(weights).toMap(), headerOnclickCallback)
             )
         }
 
@@ -31,7 +30,9 @@ class TableConstructor {
             table: TableLayout,
             context: Context,
             pidValues: Map<ObdPids, DecodedPidValue>,
-            onclickCallback: ((ObdPids) -> Unit)
+            unitOfMeasurement: UnitOfMeasurement,
+            headerOnclickCallback: (() -> Unit),
+            rowOnclickCallback: ((ObdPids) -> Unit)
         ) {
             table.removeViews(1, (table.childCount - 1).coerceAtLeast(0))
             pidValues.forEach { (pid, value) ->
@@ -40,9 +41,9 @@ class TableConstructor {
                         context,
                         weights.sum(),
                         listOf(
-                            pid.pid, pid.descriptionLong, value.valuesAsString()
+                            pid.pid, pid.descriptionLong, value.valuesAsString(unitOfMeasurement)
                         ).zip(weights).toMap()
-                    ) { onclickCallback(pid) }
+                    ) { rowOnclickCallback(pid) }
                 )
             }
 

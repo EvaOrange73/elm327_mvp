@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.elm327.data_layer.BleRepository
+import com.example.elm327.data_layer.UnitOfMeasurement
 import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
-import com.example.elm327.util.value.Value
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,7 +14,8 @@ import kotlinx.coroutines.launch
 
 data class MoreInfoFragmentViewState(
     val pidValues: Map<ObdPids, DecodedPidValue> = mapOf(),
-)
+    val unitOfMeasurement: UnitOfMeasurement = UnitOfMeasurement.METRIC_OPTIMAL,
+    )
 
 class MoreInfoFragmentViewModel(private val bleRepository: BleRepository) : ViewModel(){
     val LOG_TAG = "More Info View Model"
@@ -34,7 +35,8 @@ class MoreInfoFragmentViewModel(private val bleRepository: BleRepository) : View
             bleRepository.uiState.collect { bleState ->
                 _uiState.update {
                     MoreInfoFragmentViewState(
-                        bleState.pidValues
+                        bleState.pidValues,
+                        bleState.unitOfMeasurement
                     )
                 }
             }

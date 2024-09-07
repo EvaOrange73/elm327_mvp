@@ -3,8 +3,6 @@ package com.example.elm327.data_layer
 import android.location.Location
 import android.util.Log
 import com.example.elm327.util.DecodedPidValue
-import com.example.elm327.util.elm.ObdPids
-import com.example.elm327.util.value.Value
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -33,7 +31,7 @@ class BleNetworkDataSource {
                 .addQueryParameter("lon", location.longitude.toString())
                 .addQueryParameter("timestamp", decodedPidValue.timestamp.toString())
                 .addQueryParameter("pid", decodedPidValue.pid.pid)
-                .addQueryParameter("values", decodedPidValue.valuesAsString())
+                .addQueryParameter("values", decodedPidValue.valuesAsString(UnitOfMeasurement.SI))
                 .addQueryParameter("rawData", decodedPidValue.rawData)
                 .build()
 

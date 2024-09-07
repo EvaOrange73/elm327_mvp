@@ -5,8 +5,6 @@ import android.util.Log
 import com.example.elm327.data_layer.model.DeviceList
 import com.example.elm327.data_layer.model.MacAddress
 import com.example.elm327.util.DecodedPidValue
-import com.example.elm327.util.elm.ObdPids
-import com.example.elm327.util.value.Value
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -80,6 +78,12 @@ class BleRepositoryImp private constructor() : BleRepository {
     fun updateCarId(carId: String) {
         _uiState.update {
             it.copy(carId = carId, syncState = SyncState.SYNCHRONIZED)
+        }
+    }
+
+    fun setNextUnitOfMeasurement(){
+        _uiState.update {
+            it.copy(unitOfMeasurement = it.unitOfMeasurement.next())
         }
     }
 }

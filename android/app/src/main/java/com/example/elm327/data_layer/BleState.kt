@@ -27,6 +27,20 @@ enum class SyncState {
     NOT_SYNCHRONIZED,
 }
 
+enum class UnitOfMeasurement(val label: String) {
+    SI("SI"),
+    METRIC("metric"),
+    METRIC_OPTIMAL("metric optimal"),
+    IMPERIAL("imperial"),
+    ;
+
+    fun next(): UnitOfMeasurement {
+        val values = entries.toTypedArray()
+        val nextOrdinal = (ordinal + 1) % values.size
+        return values[nextOrdinal]
+    }
+}
+
 data class BleState(
     val scanState: ScanState = ScanState.NO_PERMISSIONS,
     val deviceList: DeviceList = DeviceList(),
@@ -39,4 +53,6 @@ data class BleState(
     val pidValues: SortedMap<ObdPids, DecodedPidValue> = sortedMapOf(comparator = compareBy<ObdPids> { it.pid }),
 
     val location: Location? = null,
+
+    val unitOfMeasurement: UnitOfMeasurement = UnitOfMeasurement.METRIC_OPTIMAL,
 )
