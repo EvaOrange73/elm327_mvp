@@ -3,6 +3,8 @@ package com.example.elm327.ui_layer.fragments
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,13 +12,15 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.ColorInt
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.elm327.R
 import com.example.elm327.data_layer.BleRepositoryImp
@@ -31,6 +35,7 @@ import com.example.elm327.ui_layer.MainActivity
 import com.example.elm327.ui_layer.viewModels.ScanFragmentViewModel
 import com.example.elm327.util.test.BleServiceTest
 import kotlinx.coroutines.launch
+
 
 @RequiresApi(Build.VERSION_CODES.P)
 class ScanFragment : Fragment() {
@@ -112,7 +117,7 @@ class ScanFragment : Fragment() {
     }
 
     private fun scanButtonOnClick() {
-        val binder  = (activity as MainActivity).bleBinder
+        val binder = (activity as MainActivity).bleBinder
         if (binder != null) {
             when (viewModel.uiState.value.scanState) {
                 ScanState.NO_PERMISSIONS -> TODO()
@@ -145,13 +150,21 @@ class ScanFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(com.google.android.material.R.color.design_default_color_on_primary, activity!!.theme))
-                val item = parent.getItemAtPosition(position) as String
-                val binder = (activity as MainActivity).bleBinder
-                (activity as MainActivity).writeToPreference(MacAddress.preferenceKey, item)
-                if (binder != null)
-                {
-                    if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).selectMacAddress(MacAddress(item)) else (binder as BleService.BleBinder).selectMacAddress(MacAddress(item))
+                if (parent.childCount != 0) {
+                    (parent.getChildAt(0) as TextView).setTextColor(
+                        resources.getColor(
+                            com.google.android.material.R.color.design_default_color_on_secondary,
+                            activity!!.theme
+                        )
+                    )
+                    val item = parent.getItemAtPosition(position) as String
+                    val binder = (activity as MainActivity).bleBinder
+                    (activity as MainActivity).writeToPreference(MacAddress.preferenceKey, item)
+                    if (binder != null) {
+                        if (GLOBAL_IS_TEST) (binder as BleServiceTest.BleBinderTest).selectMacAddress(
+                            MacAddress(item)
+                        ) else (binder as BleService.BleBinder).selectMacAddress(MacAddress(item))
+                    }
                 }
             }
 
