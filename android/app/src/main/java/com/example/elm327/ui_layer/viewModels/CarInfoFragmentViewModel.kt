@@ -42,16 +42,8 @@ class CarInfoFragmentViewModel(private val bleRepository: BleRepository) : ViewM
                     CarInfoFragmentViewState(
                         bleState.carId,
                         bleState.syncState,
-                        bleState.pidValues.filter {
-                            it.key == ObdPids.PID_00 ||
-                            it.key == ObdPids.PID_20 ||
-                            it.key == ObdPids.PID_40 ||
-                            it.key == ObdPids.PID_60
-                        },
-                        bleState.pidValues.filter {
-                            it.key == ObdPids.PID_0C ||
-                                    it.key == ObdPids.PID_0B //TODO: выбрать
-                        },
+                        bleState.pidValues.filter { it.key in ObdPids.getters },
+                        bleState.pidValues.filter { it.key in ObdPids.carInfo },
                         bleState.unitOfMeasurement,
                     )
                 }

@@ -20,6 +20,8 @@ import java.util.UUID
 class ElmManager(context: Context) : BleManager(context) {
     private val TAG = "MANAGER"
     private val OUR_TAG = "OUR"
+    private val delayPidsMillis = 500L
+    private val delayATMillis = 500L
 
     private val bleRepository: BleRepositoryImp by lazy {
         BleRepositoryImp.getInstance()
@@ -73,7 +75,7 @@ class ElmManager(context: Context) : BleManager(context) {
                     writeCharacteristic,
                     Data.from(it + "\r"),
                     BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE).await()
-                delay(1000)
+                delay(delayATMillis)
             }
         }
 
@@ -98,16 +100,12 @@ class ElmManager(context: Context) : BleManager(context) {
 
     // ==== Public API ====
     private suspend fun readPid(pid: ObdPids) {
-        if (!initialized) return
-        if (continueReading) {
-            writeCharacteristic(
-                writeCharacteristic,
-                Data.from("01" + pid.pid + '\r'),
-                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-            ).enqueue()
-            //Log.i(OUR_TAG, "read ${pid.pid}")
-            delay(500)
-        }
+        writeCharacteristic(
+            writeCharacteristic,
+            Data.from("01" + pid.pid + '\r'),
+            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+        ).enqueue()
+        //Log.i(OUR_TAG, "read ${pid.pid}")
     }
     var initialized = false
     var selectedPid: ObdPids? = null
@@ -115,13 +113,15 @@ class ElmManager(context: Context) : BleManager(context) {
 
     suspend fun startRead() {
         continueReading = true
-        while (continueReading) {
-            for (pid in ObdPids.entries) {
-                if (selectedPid == null) {
-                    GlobalScope.async { readPid(pid) }.await()
-                } else while (selectedPid != null && continueReading) {
-                    GlobalScope.async { readPid(selectedPid!!) }.await()
-                }
+        while (!initialized) delay(delayPidsMillis)
+        while (true)
+        {
+            val requestList = if (selectedPid != null) listOf(selectedPid!!) else ObdPids.entries
+            for (pid in requestList)
+            {
+                if (!continueReading) return
+                GlobalScope.async { readPid(pid) }.await()
+                delay(delayPidsMillis)
             }
         }
     }

@@ -115,6 +115,10 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
     companion object {
         private val map: Map<String, ObdPids> = entries.associateBy(ObdPids::pid)
 
+        val getters: List<ObdPids> = listOf(PID_00, PID_20, PID_40, PID_60)
+        val carInfo: List<ObdPids> = listOf(PID_0C, PID_0D, PID_0F, PID_1F, PID_31)
+        val PidGetters: List<ObdPids> = listOf()
+
         operator fun get(pid: String) = map[pid] ?: NO_PID_FOUND
         fun parse(rawData: String, timestamp: Long): DecodedPidValue
         {
