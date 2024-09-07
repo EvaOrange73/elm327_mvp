@@ -1,5 +1,7 @@
 package com.example.elm327.util.value
 
+import com.example.elm327.data_layer.UnitOfMeasurement
+
 class FuelType(private val fuelType: FuelTypes) : Value()
 {
     override val value: FuelTypes = fuelType
@@ -12,9 +14,19 @@ class FuelType(private val fuelType: FuelTypes) : Value()
         }
     }
 
-    override fun printerSI() : String
+    override fun printerSI(): String
     {
         return value.description
+    }
+
+    override fun printer(unitOfMeasurement: UnitOfMeasurement) : String
+    {
+        return value.description
+    }
+
+    fun getFuelType() : FuelTypes
+    {
+        return value
     }
 }
 
@@ -30,9 +42,19 @@ class OBDStandard(private val OBDStandard: OBDStandards) : Value()
         }
     }
 
-    override fun printerSI() : String
+    override fun printerSI(): String
     {
         return value.description
+    }
+
+    override fun printer(unitOfMeasurement: UnitOfMeasurement) : String
+    {
+        return value.description
+    }
+
+    fun getOBDStandard() : OBDStandards
+    {
+        return value
     }
 }
 
@@ -48,9 +70,19 @@ class FuelSystemStatus(private val fuelSystemStatus: FuelSystemStatuses) : Value
         }
     }
 
-    override fun printerSI() : String
+    override fun printerSI(): String
     {
         return value.description
+    }
+
+    override fun printer(unitOfMeasurement: UnitOfMeasurement) : String
+    {
+        return value.description
+    }
+
+    fun getFuelSystemStatus() : FuelSystemStatuses
+    {
+        return value
     }
 }
 
@@ -66,8 +98,18 @@ class AirStatus(private val airStatus: AirStatuses) : Value()
         }
     }
 
-    override fun printerSI() : String
+    override fun printerSI(): String
     {
         return value.description
+    }
+
+    override fun printer(unitOfMeasurement: UnitOfMeasurement) : String
+    {
+        return value.description
+    }
+
+    fun getAirStatus() : AirStatuses
+    {
+        return value
     }
 }

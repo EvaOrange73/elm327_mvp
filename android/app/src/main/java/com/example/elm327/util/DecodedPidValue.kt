@@ -13,22 +13,11 @@ data class DecodedPidValue(
     val values: List<Value>,
 ) {
     fun valuesAsString( unitOfMeasurement: UnitOfMeasurement): String {
-        return values.joinToString(",") {
-            when (unitOfMeasurement) {
-                UnitOfMeasurement.SI -> it.printerSI()
-                UnitOfMeasurement.METRIC -> "metric"
-                UnitOfMeasurement.METRIC_OPTIMAL -> "metric optimal"
-                UnitOfMeasurement.IMPERIAL -> "imperial"
-            }
-        }
-    }
-
-    private fun isPidGetter(): Boolean {
-        return this.pid in listOf(ObdPids.PID_00, ObdPids.PID_20, ObdPids.PID_40, ObdPids.PID_60)
+        return values.joinToString(",") { it.printer(unitOfMeasurement) }
     }
 
     fun valuesAsPidGetter(): String {
-        if (this.isPidGetter()) {
+        if (pid in ObdPids.getters) {
             var str = ""
             values.forEach {
                 if ((it as Bool).getSI() as Boolean) str += "${it.getIndex()} "

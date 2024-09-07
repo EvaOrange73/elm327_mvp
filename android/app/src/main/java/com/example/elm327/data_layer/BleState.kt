@@ -30,7 +30,7 @@ enum class SyncState {
 enum class UnitOfMeasurement(val label: String) {
     SI("SI"),
     METRIC("metric"),
-    METRIC_OPTIMAL("metric optimal"),
+    METRIC_OPTIMAL("optimal"),
     IMPERIAL("imperial"),
     ;
 

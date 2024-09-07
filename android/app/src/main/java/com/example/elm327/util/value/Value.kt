@@ -1,8 +1,17 @@
 package com.example.elm327.util.value
 
+import com.example.elm327.data_layer.UnitOfMeasurement
+import java.math.RoundingMode
+
 abstract class Value
 {
     abstract val value: Any
+
+    companion object
+    {
+        val roundNumbers = 2
+        val roundMode = RoundingMode.UP
+    }
 
     fun getSI() : Any
     {
@@ -11,12 +20,17 @@ abstract class Value
 
     open fun printerSI() : String
     {
+        return "${getSI()}"
+    }
+
+    open fun printer(unitOfMeasurement: UnitOfMeasurement) : String
+    {
         return value.toString()
     }
 
     override fun toString(): String
     {
-        return printerSI()
+        return value.toString()
     }
 }
 
@@ -32,9 +46,19 @@ class RawData private constructor(private val data: String) : Value()
         }
     }
 
-    override fun printerSI() : String
+    override fun printerSI(): String
     {
         return "${getSI()}"
+    }
+
+    override fun printer(unitOfMeasurement: UnitOfMeasurement) : String
+    {
+        return "${getSI()}"
+    }
+
+    fun getRaw() : String
+    {
+        return value
     }
 }
 
@@ -55,9 +79,19 @@ class Bool private constructor(private val bool: Boolean, private val index: Str
         }
     }
 
-    override fun printerSI() : String
+    override fun printerSI(): String
     {
-        return "${if (index == null) "" else "$index - "} ${if (value) "On" else "Off"}"
+        return "${getBool()}"
+    }
+
+    override fun printer(unitOfMeasurement: UnitOfMeasurement) : String
+    {
+        return if (unitOfMeasurement == UnitOfMeasurement.SI) printerSI() else "${if (index == null) "" else "$index - "} ${if (value) "On" else "Off"}"
+    }
+
+    fun getBool() : Boolean
+    {
+        return value
     }
 
     fun getIndex(): String?
@@ -66,7 +100,7 @@ class Bool private constructor(private val bool: Boolean, private val index: Str
     }
 }
 
-class Ratio private constructor(private val ratioSI: Double) : Value()
+class Ratio private constructor(private val ratioSI: Double, private val rawOnly: Boolean = false) : Value()
 {
     override val value: Double = ratioSI
 
@@ -74,18 +108,35 @@ class Ratio private constructor(private val ratioSI: Double) : Value()
     {
         fun ratio(ratioRaw: Double) : Ratio
         {
-            return Ratio(ratioRaw)
+            return Ratio(ratioRaw, true)
         }
 
         fun percents(ratioPercents: Double) : Ratio
         {
             return Ratio(ratioPercents / 100)
         }
+    }
 
-        fun degree(ratioDegrees: Double) : Ratio
+    override fun printerSI(): String
+    {
+        return "${getRatio().toBigDecimal().setScale(roundNumbers, roundMode)}"
+    }
+
+    override fun printer(unitOfMeasurement: UnitOfMeasurement) : String
+    {
+        if (rawOnly) return printerSI()
+        return when (unitOfMeasurement)
         {
-            return Ratio(ratioDegrees / 57.296)
+            UnitOfMeasurement.SI             -> printerSI()
+            UnitOfMeasurement.METRIC         -> printerPercents()
+            UnitOfMeasurement.METRIC_OPTIMAL -> printerPercents()
+            UnitOfMeasurement.IMPERIAL       -> printerPercents()
         }
+    }
+
+    fun getRatio() : Double
+    {
+        return value
     }
 
     fun getPercents() : Double
@@ -93,23 +144,13 @@ class Ratio private constructor(private val ratioSI: Double) : Value()
         return value * 100
     }
 
-    fun getDegrees() : Double
+    fun printerRatio() : String
     {
-        return value * 57.296
-    }
-
-    override fun printerSI() : String
-    {
-        return "${getSI()}"
+        return "${getRatio().toBigDecimal().setScale(roundNumbers, roundMode)}"
     }
 
     fun printerPercents() : String
     {
-        return "${getPercents()} %"
-    }
-
-    fun printerDegrees() : String
-    {
-        return "${getDegrees()} °"
+        return "${getPercents().toBigDecimal().setScale(roundNumbers, roundMode)} %"
     }
 }
