@@ -59,6 +59,11 @@ class Bool private constructor(private val bool: Boolean, private val index: Str
     {
         return "${if (index == null) "" else "$index - "} ${if (value) "On" else "Off"}"
     }
+
+    fun getIndex(): String?
+    {
+        return index
+    }
 }
 
 class Ratio private constructor(private val ratioSI: Double) : Value()

@@ -46,6 +46,7 @@ class CarInfoFragment : Fragment() {
                 viewModel.uiState.collect {
                     updateCarId(viewModel.uiState.value.carId)
                     updateSyncButton(viewModel.uiState.value.syncButtonState)
+                    updateAvailablePids(viewModel.uiState.value.pidGetters)
                     updateTable(viewModel.uiState.value.pidValues)
                 }
             }
@@ -117,6 +118,13 @@ class CarInfoFragment : Fragment() {
         navController.navigate(R.id.action_nav_gallery_to_nav_slideshow)
     }
 
+    // available pids
+    private fun updateAvailablePids(pidGetters : Map<ObdPids, DecodedPidValue>){
+        val textView = binding.availablePids
+        var availablePids = ""
+        pidGetters.forEach { (key, value) -> availablePids += value.valuesAsPidGetter() }
+        textView.text = availablePids
+    }
     // table
 
     private fun updateTable(pidValues: Map<ObdPids, DecodedPidValue>) {

@@ -7,7 +7,6 @@ import com.example.elm327.data_layer.BleRepository
 import com.example.elm327.data_layer.SyncState
 import com.example.elm327.util.DecodedPidValue
 import com.example.elm327.util.elm.ObdPids
-import com.example.elm327.util.value.Value
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,6 +16,7 @@ import kotlinx.coroutines.launch
 data class CarInfoFragmentViewState(
     val carId: String? = null,
     val syncButtonState: SyncState = SyncState.NO_PERMISSIONS,
+    val pidGetters: Map<ObdPids, DecodedPidValue> = mapOf(),
     val pidValues: Map<ObdPids, DecodedPidValue> = mapOf(),
 )
 
@@ -41,8 +41,14 @@ class CarInfoFragmentViewModel(private val bleRepository: BleRepository) : ViewM
                         bleState.carId,
                         bleState.syncState,
                         bleState.pidValues.filter {
+                            it.key == ObdPids.PID_00 ||
+                            it.key == ObdPids.PID_20 ||
+                            it.key == ObdPids.PID_40 ||
+                            it.key == ObdPids.PID_60
+                        },
+                        bleState.pidValues.filter {
                             it.key == ObdPids.PID_0C ||
-                            it.key == ObdPids.PID_0B //TODO: выбрать
+                                    it.key == ObdPids.PID_0B //TODO: выбрать
                         }
                     )
                 }
