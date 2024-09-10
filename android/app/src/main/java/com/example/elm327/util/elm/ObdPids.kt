@@ -116,8 +116,7 @@ enum class ObdPids(val pid: String, val descriptionShort: String, val descriptio
         private val map: Map<String, ObdPids> = entries.associateBy(ObdPids::pid)
 
         val getters: List<ObdPids> = listOf(PID_00, PID_20, PID_40, PID_60)
-        val carInfo: List<ObdPids> = listOf(PID_0C, PID_0D, PID_0F, PID_1F, PID_31)
-        val PidGetters: List<ObdPids> = listOf()
+        val carInfo: List<ObdPids> = listOf(PID_0C, PID_0D, PID_1F, PID_31)
 
         operator fun get(pid: String) = map[pid] ?: NO_PID_FOUND
         fun parse(rawData: String, timestamp: Long): DecodedPidValue
@@ -226,9 +225,9 @@ enum class Decoders(val decode: (String) -> List<Value>) {
     FUEL_SYSTEM_STATUS({ input -> listOf(FuelSystemStatus.fromULong(getA(input).toULong()), FuelSystemStatus.fromULong(getB(input).toULong())) }),
     AIR_STATUS({ input -> listOf(AirStatus.fromULong(getA(input).toULong())) }),
 
-    PIDS_01_20({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 1)) } }),
-    PIDS_21_40({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 21)) } }),
-    PIDS_41_60({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 41)) } }),
-    PIDS_61_80({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 61)) } }),
+    PIDS_01_20({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 1).padStart(2, '0').uppercase()) } }),
+    PIDS_21_40({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 33).padStart(2, '0').uppercase()) } }),
+    PIDS_41_60({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 65).padStart(2, '0').uppercase()) } }),
+    PIDS_61_80({ input -> getBitsFourBytes(input).mapIndexed { index, it -> Bool.boolIndexed(it, Integer.toHexString(index + 97).padStart(2, '0').uppercase()) } }),
     ;
 }

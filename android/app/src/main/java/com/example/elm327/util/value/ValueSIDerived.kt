@@ -104,8 +104,8 @@ class Frequency private constructor(private val frequencySI: Double) : Value()
         {
             UnitOfMeasurement.SI             -> printerSI()
             UnitOfMeasurement.METRIC         -> printerRevolutionsPerSecond()
-            UnitOfMeasurement.METRIC_OPTIMAL -> if (getRevolutionsPerSecond() >= 1.0) printerRevolutionsPerSecond() else if (getRevolutionsPerMinute() >= 1.0) printerRevolutionsPerMinute() else printerRevolutionsPerHour()
-            UnitOfMeasurement.IMPERIAL       -> printerRevolutionsPerSecond()
+            UnitOfMeasurement.METRIC_OPTIMAL -> printerRevolutionsPerMinute()
+            UnitOfMeasurement.IMPERIAL       -> printerRevolutionsPerMinute()
         }
     }
 

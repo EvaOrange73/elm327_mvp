@@ -7,6 +7,7 @@ import android.content.Context
 import android.util.Log
 import com.example.elm327.data_layer.BleRepositoryImp
 import com.example.elm327.data_layer.ConnectionState
+import com.example.elm327.data_layer.UnitOfMeasurement
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -21,7 +22,7 @@ class ElmManager(context: Context) : BleManager(context) {
     private val TAG = "MANAGER"
     private val OUR_TAG = "OUR"
     private val delayPidsMillis = 500L
-    private val delayATMillis = 500L
+    private val delayATMillis = 1000L
 
     private val bleRepository: BleRepositoryImp by lazy {
         BleRepositoryImp.getInstance()
@@ -51,12 +52,14 @@ class ElmManager(context: Context) : BleManager(context) {
     override fun initialize() {
         setNotificationCallback(readCharacteristic).with { bluetoothDevice: BluetoothDevice, data: Data ->
             val value = data.getStringValue(0)!!
-            if (value.contains('>')) initialized = true
-            //Log.i(OUR_TAG, value)
+//            if (value.contains('>')) initialized = true
+            Log.i(OUR_TAG, value)
             val decodedValue = ObdPids.parse(value, System.currentTimeMillis())
-            if (decodedValue.pid != ObdPids.NO_PID_FOUND)
-            {
-                //Log.i(OUR_TAG, "${decodedValue.pid} -- ${decodedValue.valuesAsString()}")
+            Log.i(
+                OUR_TAG,
+                "${decodedValue.pid} -- ${decodedValue.valuesAsString(UnitOfMeasurement.SI)}"
+            )
+            if (decodedValue.pid != ObdPids.NO_PID_FOUND) {
                 bleRepository.updatePidValue(ObdPids.parse(value, System.currentTimeMillis()))
             }
         }
@@ -69,18 +72,24 @@ class ElmManager(context: Context) : BleManager(context) {
             .enqueue()
         //enableNotifications(fluxCapacitorControlPoint).enqueue()
 
-        GlobalScope.launch {
-            initCommands.forEach {
-                writeCharacteristic(
-                    writeCharacteristic,
-                    Data.from(it + "\r"),
-                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE).await()
+
+        GlobalScope.async {
+            GlobalScope.launch {
+                initCommands.forEach {
+                    GlobalScope.launch {
+                        writeCharacteristic(
+                            writeCharacteristic,
+                            Data.from(it + "\r"),
+                            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                        ).enqueue()
+                        delay(delayATMillis)
+                    }.join()
+                }
                 delay(delayATMillis)
-            }
+            }.join()
+            initialized = true
+            bleRepository.updateConnectionState(ConnectionState.CONNECTED)
         }
-
-
-        bleRepository.updateConnectionState(ConnectionState.CONNECTED)
     }
 
     override fun onServicesInvalidated() {
@@ -99,7 +108,8 @@ class ElmManager(context: Context) : BleManager(context) {
     }
 
     // ==== Public API ====
-    private suspend fun readPid(pid: ObdPids) {
+    private fun readPid(pid: ObdPids) {
+        if (pid == ObdPids.NO_PID_FOUND) return
         writeCharacteristic(
             writeCharacteristic,
             Data.from("01" + pid.pid + '\r'),
@@ -107,26 +117,27 @@ class ElmManager(context: Context) : BleManager(context) {
         ).enqueue()
         //Log.i(OUR_TAG, "read ${pid.pid}")
     }
+
     var initialized = false
     var selectedPid: ObdPids? = null
     var continueReading = false
 
     suspend fun startRead() {
         continueReading = true
-        while (!initialized) delay(delayPidsMillis)
-        while (true)
-        {
+        while (!initialized) GlobalScope.launch { delay(delayPidsMillis) }.join()
+        while (true) {
             val requestList = if (selectedPid != null) listOf(selectedPid!!) else ObdPids.entries
-            for (pid in requestList)
-            {
+            for (pid in requestList) {
                 if (!continueReading) return
-                GlobalScope.async { readPid(pid) }.await()
-                delay(delayPidsMillis)
+                GlobalScope.launch {
+                    readPid(pid)
+                    delay(delayPidsMillis)
+                }.join()
             }
         }
     }
 
-    fun stopRead(){
+    fun stopRead() {
         continueReading = false
     }
 }
