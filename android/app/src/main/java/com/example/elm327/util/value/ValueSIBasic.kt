@@ -339,12 +339,12 @@ class Temperature private constructor(private val temperatureSI: Double) : Value
 
     fun printerCelsius() : String
     {
-        return "${getCelsius().toBigDecimal().setScale(roundNumbers, roundMode)} C"
+        return "${getCelsius().toBigDecimal().setScale(roundNumbers, roundMode)} °C"
     }
 
     fun printerFahrenheit() : String
     {
-        return "${getFahrenheit().toBigDecimal().setScale(roundNumbers, roundMode)} F"
+        return "${getFahrenheit().toBigDecimal().setScale(roundNumbers, roundMode)} °F"
     }
 }
 
