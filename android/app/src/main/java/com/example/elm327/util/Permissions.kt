@@ -20,7 +20,7 @@ class Permissions(private val mainActivity: MainActivity) {
 
     companion object
     {
-        val permissionsToCheck: List<String> = listOf(
+        val permissionsToCheck: Array<String> = arrayOf(
                                 Manifest.permission.BLUETOOTH,
                                 Manifest.permission.BLUETOOTH_ADMIN,
                                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -40,10 +40,11 @@ class Permissions(private val mainActivity: MainActivity) {
     }
 
     fun showPermissionsState() {
-        for (permission in permissionsToCheck) {
-            curPermission = permission
-            showCurPermissionState()
-        }
+//        for (permission in permissionsToCheck) {
+//            curPermission = permission
+//            showCurPermissionState()
+//        }
+        ActivityCompat.requestPermissions(this.mainActivity, permissionsToCheck, REQUEST_PERMISSION_BLE)
     }
 
     fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
@@ -67,31 +68,31 @@ class Permissions(private val mainActivity: MainActivity) {
         }
     }
 
-    private fun showCurPermissionState() {
-        if (curPermission == null) return
-        val permissionCheck = ContextCompat.checkSelfPermission(this.mainActivity, curPermission!!)
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this.mainActivity, curPermission!!)) {
-                showExplanation("Permission Needed", "Rationale", curPermission!!, REQUEST_PERMISSION_BLE)
-            }
-            else {
-                requestPermission(curPermission!!, REQUEST_PERMISSION_BLE)
-            }
-        }
-        else {
-            Log.i(LOG_TAG, "Permission ${curPermission!!.split('.').last()} already Granted!")
-        }
-    }
+//    private fun showCurPermissionState() {
+//        if (curPermission == null) return
+//        val permissionCheck = ContextCompat.checkSelfPermission(this.mainActivity, curPermission!!)
+//        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this.mainActivity, curPermission!!)) {
+//                showExplanation("Permission Needed", "Rationale", curPermission!!, REQUEST_PERMISSION_BLE)
+//            }
+//            else {
+//                requestPermission(curPermission!!, REQUEST_PERMISSION_BLE)
+//            }
+//        }
+//        else {
+//            Log.i(LOG_TAG, "Permission ${curPermission!!.split('.').last()} already Granted!")
+//        }
+//    }
 
-    private fun showExplanation(title: String, message: String, permission: String, permissionRequestCode: Int) {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this.mainActivity)
-        builder.setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.ok, DialogInterface.OnClickListener { dialog, id -> requestPermission(permission, permissionRequestCode) })
-        builder.create().show()
-    }
+//    private fun showExplanation(title: String, message: String, permission: String, permissionRequestCode: Int) {
+//        val builder: AlertDialog.Builder = AlertDialog.Builder(this.mainActivity)
+//        builder.setTitle(title)
+//            .setMessage(message)
+//            .setPositiveButton(android.R.string.ok, DialogInterface.OnClickListener { dialog, id -> requestPermission(permission, permissionRequestCode) })
+//        builder.create().show()
+//    }
 
-    private fun requestPermission(permissionName: String, permissionRequestCode: Int) {
-        ActivityCompat.requestPermissions(this.mainActivity, arrayOf(permissionName), permissionRequestCode)
-    }
+//    private fun requestPermission(permissionName: String, permissionRequestCode: Int) {
+//        ActivityCompat.requestPermissions(this.mainActivity, arrayOf(permissionName), permissionRequestCode)
+//    }
 }
