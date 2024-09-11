@@ -32,6 +32,10 @@ import com.example.elm327.databinding.ActivityMainBinding
 import com.example.elm327.util.Permissions
 import com.example.elm327.util.test.BleServiceTest
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 val GLOBAL_IS_TEST: Boolean = false
 @RequiresApi(Build.VERSION_CODES.P)
@@ -49,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     private val bluetoothAdapter: BluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
     private val locationManager: LocationManager by lazy { applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager }
-    private val locationListener: LocationListener = LocationListener { location -> bleRepository.updateLocation(location) }
+    private val locationListener: LocationListener by lazy { LocationListener { location -> bleRepository.updateLocation(location) } }
 
     private val sharedPreferences: String = "preferenceName"
 
@@ -84,11 +88,12 @@ class MainActivity : AppCompatActivity() {
             MacAddress.setDefault(res)
         }
 
-        permissions.showPermissionsState()
+        if (permissions.showPermissionsState())
+        {
+            checkSystemServicesEnabled()
 
-        checkSystemServicesEnabled()
-
-        requestLocation()
+            requestLocation()
+        }
     }
 
     private fun checkSystemServicesEnabled() {
@@ -136,12 +141,17 @@ class MainActivity : AppCompatActivity() {
         ) {
             return
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0F, locationListener )
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0F, locationListener)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults))
+        {
+            checkSystemServicesEnabled()
+
+            requestLocation()
+        }
     }
 
     fun getPreferenceValue(key: String): String?
