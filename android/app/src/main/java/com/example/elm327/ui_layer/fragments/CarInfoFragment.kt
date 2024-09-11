@@ -106,10 +106,14 @@ class CarInfoFragment : Fragment() {
     }
 
     private fun syncButtonOnClick() {
-        binding.editTextText2.clearFocus()
-        val text = binding.editTextText2.text.toString()
-        if (text.isNotEmpty()) {
-            bleRepository.updateCarId(text)
+        if (viewModel.uiState.value.syncButtonState == SyncState.SYNCHRONIZED){
+            bleRepository.updateCarId(null)
+        } else {
+            binding.editTextText2.clearFocus()
+            val text = binding.editTextText2.text.toString()
+            if (text.isNotEmpty()) {
+                bleRepository.updateCarId(text)
+            }
         }
     }
 

@@ -83,9 +83,15 @@ class BleRepositoryImp private constructor() : BleRepository {
         }
     }
 
-    fun updateCarId(carId: String) {
-        _uiState.update {
-            it.copy(carId = carId, syncState = SyncState.SYNCHRONIZED)
+    fun updateCarId(carId: String?) {
+        if (carId == null) {
+            _uiState.update {
+                it.copy(carId = carId, syncState = SyncState.NOT_SYNCHRONIZED)
+            }
+        } else {
+            _uiState.update {
+                it.copy(carId = carId, syncState = SyncState.SYNCHRONIZED)
+            }
         }
     }
 
