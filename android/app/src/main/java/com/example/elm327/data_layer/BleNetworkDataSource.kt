@@ -35,6 +35,29 @@ class BleNetworkDataSource {
                 .addQueryParameter("rawData", decodedPidValue.rawData)
                 .build()
 
+            request(httpUrl)
+
+        }
+
+        fun updateLocation(
+            id: String,
+            location: Location,
+        ) {
+            val httpUrl: HttpUrl = HttpUrl.Builder()
+                .scheme("https")
+                .host("mtrack-test.oqode.ru")
+                .port(5055)
+                .addQueryParameter("id", id)
+                .addQueryParameter("lat", location.latitude.toString())
+                .addQueryParameter("lon", location.longitude.toString())
+                .addQueryParameter("timestamp", location.time.toString())
+                .build()
+
+            request(httpUrl)
+        }
+
+
+        private fun request(httpUrl: HttpUrl){
             Log.i(LOG_TAG, httpUrl.toString())
 
             val request: Request = Request.Builder().url(httpUrl).build()
@@ -52,7 +75,6 @@ class BleNetworkDataSource {
                     }
                 }
             })
-
         }
     }
 

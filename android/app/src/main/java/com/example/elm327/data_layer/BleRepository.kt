@@ -31,6 +31,14 @@ class BleRepositoryImp private constructor() : BleRepository {
 
     fun updateLocation(location: Location){
         Log.i(LOG_TAG, "${location.longitude} ${location.latitude}")
+
+        if (_uiState.value.carId != null && _uiState.value.location != null) {
+            BleNetworkDataSource.updateLocation(
+                _uiState.value.carId!!,
+                _uiState.value.location!!,
+            )
+        }
+
         _uiState.update {
             it.copy(location = location)
         }
